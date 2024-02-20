@@ -5,7 +5,7 @@ For this exercise, we will assume that the computers illustrated can only run a 
 
 The computer is running a _test case_, which is a section of code written by a test engineer, against an API provided by a testing framework. To begin with, the test uses this API to fill in a kind of _checklist_ (data structure) with information about what function calls should come _out_ of the code-under-test.
 ![My test case makes a checklist of events that I will expect during the test.](/coroutines/docs/images/current_1.png)
-Having filled in the checklist, we are now ready to begin the test itself. We use a coding practice called _dependency injection_ which ensurtes that some or all of the _outgoing_ function calls from the code-under-test are diverted to us and not their original intended destination. There are a few different ways to do this, and the best option usually depends on the programming language in use. We implement this and call the code-under-test.
+Having filled in the checklist, we are now ready to begin the test itself. We use a coding practice called _dependency injection_ which ensures that some or all of the _outgoing_ function calls from the code-under-test are diverted to us and not their original intended destination. There are a few different ways to do this, and the best option usually depends on the programming language in use. We implement this and call the code-under-test.
 ![I am starting the code-under-test, with an injected dependancy back to me.](/coroutines/docs/images/current_2.png)
 The code-under-test has begun running on our computer. We must wait for it to either complete or make a call that will come to us because of our dependency injection. 
 
