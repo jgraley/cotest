@@ -13,7 +13,7 @@ For the sake of example, let's assume a call comes to us. Because our computer i
 ![I received a call on the injected dependency. Thinks: I can't just let my test case continue here. I will use the checklist to find out whether it is correct.](/coroutines/docs/images/current_3.png)
 It is natural for the checklist to also contain an action to be taken and the required return value for the call. We can insert our own code here, but it is not freely running code: it needs to be put in the place alloted to it. 
 ![The call was correct! Now the checklist tells me how to respond to the call.](/coroutines/docs/images/current_4.png)
-We will assume that the code-under-test now completes after making one call to us. The function call we made earlier on to start the code-under-test now returns, and we can check the return value using free-running code. We are also free to begin another test.
+We will assume that the code-under-test now completes having made one call to us. The function call we made earlier on to start the code-under-test now returns, and we can check the return value using free-running code. We are also free to begin another test.
 ![The code-under-test has completed and I check its output. Test passed!](/coroutines/docs/images/current_5.png)
 ### Alternative method
 An alternative approach taken in the industry is to restrict the checklist to instructions on how to respond to calls. Then, while the code-under-test is running we build up a record of what calls were made. This record is then checked at the end of the test by the test case. This method has advantages and disadvantages.
