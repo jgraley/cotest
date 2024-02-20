@@ -33,7 +33,7 @@ Again the testing computer will be free to continue execution either immediately
 Since the test computer is not waiting for the code-under-test to return, it must instead wait for the message from the other computer confirming that the code-under-test did return, and supplying any return value. It does not have to do this until it _expects_ this to happen. It can now complete the test or start another.
 ![I say "the code-under-test has completed and here is its output". I check the output. Test passed!](/coroutines/docs/images/cotest_4.png)
 
-## Observation
+## Discussion
 We have been able to formulate the code constituting the _test case_ as a sequence of message send/receive operations, interspersed with checking of received data and generation of new stimulus data. 
 
 We have not needed to build a checklist in advance of the test, nor (in the alternative model) verify a report at the end. Stimulus generation occurs just before use and can take into account any event that occurred previously during the test. Checking is done as soon as possible, so that failures can be identified soon after the presumed malfunction of the code-under-test. Segments of the test case could be placed in loops, for example, and the loop's progress will be preserved across incoming calls.
