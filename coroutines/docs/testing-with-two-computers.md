@@ -47,7 +47,7 @@ First, we should fix some terminology. When we have discussed computers and "pro
 
 There are in fact plenty of ways to permit multiple contexts of execution in a single real computer. One would be to make explicit use of multiple cores (explicit binding), but this also seems wasteful. Without explicit binding, the main methods are _processes_, _threads_, and _coroutines_ (sometimes called _fibres_).
 
-Processes and threads differ in how memory is presented to the user's code. But both possess the interesting property that the computer's operating system can share CPU time across many of them, giving the impression that both are running at the same time (_concurrency_). 
+Processes and threads differ in how memory is presented to the user's code. But both possess the interesting property that the computer's operating system can share CPU time across many of them, giving the impression that all are running at the same time (_concurrency_). 
 
 However, in the above example it isn't necessary to do this. Where we have said, "that function returns either immediately, or as soon as any message is received in reply" it transpires that our objectives are fully met if the test case _does_ have to wait for a reply. Indeed in a testing context, we might prefer to avoid the repeatability problems that can arise from concurrency.
 
