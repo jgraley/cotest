@@ -71,10 +71,10 @@ COTEST(MutexScenarioTest, Simple) {
     ExampleClass example(&mock_mutex);
     WATCH_CALL();
 
-    auto d = LAUNCH(example.Example1(22));
-    WAIT_FOR_CALL_FROM(mock_mutex, lock, d).RETURN();
-    WAIT_FOR_CALL_FROM(mock_mutex, unlock, d).RETURN();
-    EXPECT_EQ(WAIT_FOR_RESULT()(d), 0);
+    auto l = LAUNCH(example.Example1(22));
+    WAIT_FOR_CALL_FROM(mock_mutex, lock, l).RETURN();
+    WAIT_FOR_CALL_FROM(mock_mutex, unlock, l).RETURN();
+    EXPECT_EQ(WAIT_FOR_RESULT()(l), 0);
 }
 
 // The difficulty levels of the tests can be understood as increasing

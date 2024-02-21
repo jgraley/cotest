@@ -144,6 +144,10 @@ if (coro_build_tests)
   cxx_test(cotest-launch-multi-coro cotest)
   cxx_test(cotest-launch-lifetime cotest)
   cxx_test(cotest-serverised cotest)
+
+  ############################################################
+  # Test the examples in the docs
+  cxx_test(examples-for-docs cotest)
   
 endif()
 
