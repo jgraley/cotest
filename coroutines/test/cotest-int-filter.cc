@@ -189,8 +189,8 @@ TEST(InteriorFilteringTest, Complex) {
 
     auto coro = COROUTINE(Complex) {
         while (true) {
-            auto cs = MOCK_CALL_HANDLE(mock_object, Mock1(_));
-            auto cs2 = MOCK_CALL_HANDLE(mock_object, Mock1);
+            auto cs = SIGNATURE_HANDLE(mock_object, Mock1(_));
+            auto cs2 = SIGNATURE_HANDLE(mock_object, Mock1);
 
             cs = WAIT_FOR_CALL().IS_CALL(mock_object, Mock1(IsEven()));
             EXPECT_TRUE(cs);
