@@ -2,7 +2,7 @@
 
 using namespace testing;
 
-// ------------- Launching --------------
+// ------------- Getting Started --------------
 
 class MyClass {
    public:
@@ -21,7 +21,11 @@ COTEST(MyTest, Case1) {
     MyClass my_instance;
     
     LaunchHandle<int> l = LAUNCH( my_instance.Method1(24) );
-    EXPECT_EQ( WAIT_FOR_RESULT()(l), 72 );
+    /// alternative: auto
+    ResultHandle r = WAIT_FOR_RESULT();
+    EXPECT_TRUE(r);
+    EXPECT_EQ(r(l), 72);
+    // alternative EXPECT_EQ( WAIT_FOR_RESULT()(l), 72 );
 }
 
 COTEST(MyTest, Case2)
@@ -74,6 +78,8 @@ class Painter {
 public:
     Painter(Turtle *turtle) : my_turtle(turtle) {}
 
+    void EmptyMethod() {}
+
     void DrawDot() {
         my_turtle->PenDown();
         my_turtle->PenUp();
@@ -88,20 +94,6 @@ public:
         my_turtle->PenUp();
     }
 
-    void CheckPosition() {
-        if( my_turtle->GetX() < -100 ||
-            my_turtle->GetX() > 100 ||
-            my_turtle->GetY() < -100 ||
-            my_turtle->GetY() > 100 )
-            my_turtle->GoTo(0, 0);
-    }
-        
-    void GoToRandomPointOnCircle( int radius ) {
-        float a = 2*M_PI * rand() / RAND_MAX;
-        my_turtle->GoTo( round(radius*sin(a)),
-                         round(radius*cos(a)) );
-    }
-        
     void DrawSquareInkChecks(int size) {
         my_turtle->PenDown();
         for( int i=0; i<4; i++ ) {
@@ -113,16 +105,63 @@ public:
         my_turtle->PenUp();
     }
 
+    void CheckPosition() {
+        if( my_turtle->GetX() < -100 ||
+            my_turtle->GetX() > 100 ||
+            my_turtle->GetY() < -100 ||
+            my_turtle->GetY() > 100 )
+            my_turtle->GoTo(0, 0);
+    }
+        
+    void GoToPointTopLeft() {
+        my_turtle->GoTo( -1, 1 );
+    }
+
+    void GoToRandomPointOnCircle( int radius ) {
+        float a = 2*M_PI * rand() / RAND_MAX;
+        my_turtle->GoTo( round(radius*sin(a)),
+                         round(radius*cos(a)) );
+    }
+        
    private:
     Turtle * const my_turtle;
 };
+
+COTEST(PainterTest, GoToPointTopLeft)
+{
+    MockTurtle mock_turtle;
+    Painter painter(&mock_turtle);
+    WATCH_CALL();
+    // Alternatives
+    //WATCH_CALL(mock_turtle);
+    //WATCH_CALL(mock_turtle, GoTo);
+
+    auto l = LAUNCH( painter.GoToPointTopLeft() );
+
+    MockCallHandle c = WAIT_FOR_CALL();
+    EXPECT_TRUE( c.IS_CALL(mock_turtle, GoTo).With(Lt()) );
+    c.RETURN();
+    WAIT_FOR_RESULT();
+}
+
+COTEST(PainterTest, GoToPointTopLeft2)
+{
+    MockTurtle mock_turtle;
+    Painter painter(&mock_turtle);
+    WATCH_CALL(mock_turtle, GoTo).With(Lt());
+
+    auto l = LAUNCH( painter.GoToPointTopLeft() );
+
+    WAIT_FOR_CALL().RETURN();
+    WAIT_FOR_RESULT();
+    SATISFY(); // Workaround issue #11
+}
 
 COTEST(PainterTest, Dot)
 {
     MockTurtle mock_turtle;
     Painter painter(&mock_turtle);
     WATCH_CALL();
-    // Alternative: WATCH_CALL(mock_turtle);
 
     auto l = LAUNCH( painter.DrawDot() );
 
@@ -132,6 +171,7 @@ COTEST(PainterTest, Dot)
     WAIT_FOR_CALL(mock_turtle, PenUp).RETURN();
     WAIT_FOR_RESULT();
 }
+
 
 COTEST(PainterTest, CheckPosition)
 {
@@ -255,14 +295,36 @@ COTEST(PainterTest, RandomPointOnCircle)
     WAIT_FOR_RESULT();
 }
 
-// TODO    
-// The above are good for the getting started guide.
-// From() also belongs in the getting started guide even though it needs
-// overlapping launches to motivate.
-// Try to get With() in therer too: it works with IS_CALL and WATCH_CALL but not WAIT_FOR_CALL
-//
-// Then: for interworking guide, cover COROUTINE() and NEW_COROUTINE(),
+
+COTEST(PainterTest, MultiLaunch)
+{
+    MockTurtle mock_turtle;
+    Painter painter(&mock_turtle);
+    WATCH_CALL();
+
+    auto l1 = LAUNCH( painter.DrawDot() );
+    
+    auto c1 = WAIT_FOR_CALL_FROM(mock_turtle, PenDown, l1);
+    //alternative
+    //auto c1 = WAIT_FOR_CALL_FROM(l1);
+    //EXPECT_TRUE( c1.IS_CALL(mock_turtle, PenDown).From(l1) );
+    // but different dropping rules
+    auto l2 = LAUNCH( painter.EmptyMethod() );
+    WAIT_FOR_RESULT_FROM(l2);
+
+    c1.RETURN();
+    WAIT_FOR_CALL(mock_turtle, PenUp).RETURN();
+    WAIT_FOR_RESULT_FROM(l1);
+}
+
+
+// ------------- Getting Started --------------
+ 
+// For interworking guide, cover COROUTINE() and NEW_COROUTINE(),
 // the cardinality API and EXIT_COROUTINE. Do multi-coro examples.
-//
-// For serverised guide, NEXT_EVENT, IS_CALL() with no args, IS_RESULT() and
-// EventHandle
+
+// ------------- Server style --------------
+
+// For serverised guide, cover NEXT_EVENT(), IS_CALL() with no args,
+// IS_RESULT() and EventHandle. But it's probably OK to directly reference
+// cotest-serverised.cc examples

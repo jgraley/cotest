@@ -205,7 +205,7 @@ class InteriorSignatureMockCS<R(Args...)> {
 template <typename R>
 std::shared_ptr<InteriorLaunchSession<R>> TestCoroutine::Launch(internal::LaunchLambdaType<R> &&user_lambda,
                                                                 std::string df_name) {
-    COTEST_ASSERT(!next_payload && "Launch(): must use NextEvent() to collect an event first");
+    COTEST_ASSERT(!next_payload && "Launch(): must use NextEvent() or WAIT_...() to collect an event first");
     const auto ils = std::make_shared<InteriorLaunchSession<R>>(this, df_name);
     ils->Launch(std::move(user_lambda));
     return ils;

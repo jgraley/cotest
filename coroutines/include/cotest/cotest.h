@@ -259,7 +259,7 @@ namespace testing {
         cg;                                        \
     })
 
-// ------------------- Any call -----------------------
+// ------------------- Any call from -----------------------
 
 // As above, but from given lauch session only
 
@@ -282,7 +282,7 @@ namespace testing {
 
 // Wait for a completed launch, dropping mock calls
 #define WAIT_FOR_RESULT_NSE(CG)         \
-    ::testing::EventHandle CG;          \
+    ::testing::ResultHandle CG;         \
     do {                                \
         auto cg_ = NEXT_EVENT();        \
         CG = cg_.IS_RESULT_ARG_0();     \
@@ -293,6 +293,23 @@ namespace testing {
     ({                           \
         WAIT_FOR_RESULT_NSE(cg); \
         cg;                      \
+    })
+
+// ---------------- wait for result from ------------------
+
+// Wait for a completed launch, dropping mock calls
+#define WAIT_FOR_RESULT_FROM_NSE(CG, DS)     \
+    ::testing::ResultHandle CG;              \
+    do {                                     \
+        auto cg_ = NEXT_EVENT();             \
+        CG = cg_.IS_RESULT_ARG_0().From(DS); \
+        if (!CG) cg_.DROP();                 \
+    } while (!CG);
+
+#define WAIT_FOR_RESULT_FROM(DS)          \
+    ({                                    \
+        WAIT_FOR_RESULT_FROM_NSE(cg, DS); \
+        cg;                               \
     })
 
 // ---------------------- COTEST ---------------------------
@@ -380,6 +397,7 @@ class EventHandle {
 
 // Allow user to be more explicit about what they need
 using MockCallHandle = EventHandle;
+using ResultHandle = EventHandle;
 
 // Handle for a mock call session when the function type is known. Templated
 // on the function type eg int(char *)
