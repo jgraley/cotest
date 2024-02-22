@@ -19,7 +19,7 @@ class MyClass {
 ```
 In most testing frameworks, we would simply call the methods on an instance of the class, and check the return value and/or side effects. 
 
-### Simple example
+#### Simple example
 
 In Cotest, this call is replaced by two steps: we _launch_ the code-under-test, and then we _wait_ for the launch to complete.
 
@@ -41,7 +41,7 @@ Note that:
  1. `LaunchHandle` is templated on the result type, which is the `decltype()` of the supplied expression.
  2. To extract the actual return value, we use function call syntax, combining the two handles: `result(launch)`
 
-### More compact example
+#### More compact example
 
 To save typing, we can use `auto` for handles. We can also make the extraction of return value more compact. So we could write simply
 ```
@@ -52,7 +52,7 @@ COTEST(MyTest, Case1) {
     EXPECT_EQ( WAIT_FOR_RESULT()(l), 72 );
 }
 ```
-### Void return and ref argument example
+#### Void return and ref argument example
 
 Let's vary things a bit. This time, the function we call
  - will have void return, and
@@ -73,7 +73,7 @@ In the case of void return, Cotest requires that we use `WAIT_FOR_RESULT()` or s
 
 We can see that the code under test has successfully modfied our local variable `i`. Thus, Cotest respects reference arguments to launches.
 
-### Arbitrary expression example
+#### Arbitrary expression example
 
 The `LAUNCH()` macro takes an expression, and this does not need to be of the form `<object>.<method(<args>)`. For example, we can test an operator using its intended syntax:
 
@@ -90,7 +90,7 @@ COTEST(MyTest, Case3)
 
 Please see [the test case for the examples](/coroutines/test/examples-for-docs.cc) for code-under-test and mocking assets - this way we can concentrate on the Cotest test cases.
 
-### Test with a mock call example
+#### Test with a mock call example
 
 Let's call a code-under-test function that makes a mock call. We will 
  - Inject a dependency onto our mock object by passing a pointer to it to the code-under-test.
@@ -125,7 +125,7 @@ In place of `WATCH_CALL()` we could have used:
  - `WATCH_CALL(mock_turtle, GoTo)` to only see calls to that method, or for example
  - `WATCH_CALL(mock_turtle, GoTo(_, 1))` to only see acceptible calls.
 
-### Filtering calls in the watch example
+#### Filtering calls in the watch example
 
 In the case of `WATCH_CALL(mock_turtle, GoTo(_, 1))`, we would not need to check inside the coroutine and could use just
 ```
@@ -146,7 +146,7 @@ COTEST(PainterTest, GoToPoint2)
 ```
 The more restrictive forms of `WATCH_CALL()` will prevent the coroutine from "seeing" calls that don't match. These calls will then be dealt with by Google Mock in the same way as a call that has no matching `EXPECT_CALL()`. Indeed, `WATCH_CALL()` is the Cotest counterpart to `EXPECT_CALL()`.
 
-### Mock return affects behaviour example
+#### Mock return affects behaviour example
 
 To consolidate, let's try using Cotest for a case where the return values we supply from mock calls will affect behaiour of the code-under-test. In this case, the code-under-test stops calling `GetX()` or `GetY()` as soon as one of them returns a co-ordinate that is out of range.
 
@@ -178,7 +178,7 @@ This example demonstrates Cotest's _linearity_ property: information showing to 
 
 Of course, the user is free to break linearity by adding loops or function calls to the test body. _Please note that function calls containing any of the upper-case Cotest commands will usually not be compatible with C++20 coroutines when support for these is added._
 
-### Loop inside test case example
+#### Loop inside test case example
 
 Here we give an example of a Cotest test containing a loop
 
@@ -202,7 +202,7 @@ COTEST(PainterTest, Square)
 ```
 Cotest helps us to paint a picture of an expectation that is "framed" by `PenDown()` and `PenUp()` and also contains a loop with a slightly non-trival body (two mock calls).
 
-### Flexible test example
+#### Flexible test example
 
 Suppose we decide that continuing to turn by 90 degrees and draw another line is acceptable as long as it only over-paints what was already there. In Cotest, we will want to chenge the behaviour of the test case, based upon the _events_ (mock calls or launch completions) we receive.
 
@@ -235,7 +235,7 @@ COTEST(PainterTest, SquareFlexibleCase)
 ## Adding expectations to Cotest tests
 [Working With GMock](/coroutines/docs/working-with-gmock.md) will cover interoperation between GMock and Cotest features, but we will dip our toes in here. Suppose we want to allow some number of calls to some new mock call, but the current test case does not need to verify these calls. 
 
-### Watch then expect example
+#### Watch then expect example
 
 The solution in GMock is to add a separate expectation for these calls, or use ON_CALL. In Cotest, we can do the same:
 ```
@@ -253,7 +253,7 @@ The new code-under-test method makes calls to `InkCheck()` and we want to absorb
 
 Since the `EXPECT_CALL()` comes after the `WATCH_CALL()` it has a higher priority. This means the coroutine will not _see_ the call if the expectation handles it, and in this case the expectation handles all calls to `InkCheck()`.
 
-### Expect then watch example
+#### Expect then watch example
 
 We could reverse the priorities if we wanted. The test case is interested in four different mock calls but not interested in a fifth, so things get a little unwieldly:
 ```
