@@ -56,7 +56,7 @@ COTEST(MyTest, Case1) {
 
 Let's vary things a bit. This time, the function we call
  - will have void return, and
- - will take a reference (and cause a swide-effect through it).
+ - will take a reference (and cause a side-effect through it).
 
 ```
 COTEST(MyTest, Case2)
