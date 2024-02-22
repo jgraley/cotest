@@ -69,7 +69,7 @@ COTEST(MyTest, Case2)
     EXPECT_EQ( i, 72 );
 }
 ```
-In the case of void return, Cotest requires that we use `WAIT_FOR_RESULT()` or similar, in order to prove that the test case has checkd for completion of the launch. This must happen before the launch handle goes out of scope, even though we don't use it directly.4
+In the case of void return, Cotest requires that we use `WAIT_FOR_RESULT()` or similar, in order to prove that the test case has checked for completion of the launch. This must happen before the launch handle goes out of scope, even though we don't use it directly.
 
 We can see that the code under test has successfully modfied our local variable `i`. Thus, Cotest respects reference arguments to launches.
 
@@ -115,9 +115,9 @@ COTEST(PainterTest, GoToPoint)
 }
 ```
 To handle the mock:
- - We have used `WAIT_FOR_CALL()` which wiull give us a mock call handle as soon as the mock call is made.
+ - We have used `WAIT_FOR_CALL()` which will give us a mock call handle as soon as the mock call is made.
  - We have checked that the call is correct using `IS_CALL()` which has semantics similar to Google Mock's `EXPECT_CALL()`; a match returns true.
-   - _In fact, the same handle is returns and this evaluates to `true` otherwise a null handle is returned, which evaluates to `false`.
+   - In fact, the same handle is returns and this evaluates to `true` otherwise a null handle is returned, which evaluates to `false`.
  - We instruct the mock call to return. `GoTo()` returns void so no value is required. 
 
 In place of `WATCH_CALL()` we could have used:
@@ -237,7 +237,7 @@ COTEST(PainterTest, SquareFlexibleCase)
 
 #### Watch then expect example
 
-The solution in GMock is to add a separate expectation for these calls, or use ON_CALL. In Cotest, we can do the same:
+The solution in GMock is to add a separate expectation for these calls, or use `ON_CALL()`. In Cotest, we can do the same:
 ```
 COTEST(PainterTest, SquareInkChecks1)
 {
@@ -274,7 +274,12 @@ COTEST(PainterTest, SquareInkChecks2)
 
 
 # TODO
- - section on RandomPointOnCircle which demonstrates GetArg<>()
- - section on MultiLaunch which demonstrates _FROM etc
- - trouble in SquareFlexibleCase - it's going to ACCEPT whatever mock call it sees at the top of the loop body as long as it's on mock_turtle. But later we introduce InkCheck() and want these calls dropped. Not wanting full server style, what to do? I think NEXT_EVENT() needs to go back to its roots as a PEEK() - like operation. We should be able to do NEXT_EVENT() any number of times and get the same event until we DROP, ACCEPT or IS_RETURN it. Thus we could use NEXT_EVENT() before WAIT_FOR_CALL() as a "pre-filter". The WAIT_FOR_CALL()s are now fully filtering again.
- - Then, since this is the best way to deal with InkCheck(), give this example first (i.e. `EXPECT(InkCheck); WATCH_CALL();`) and then the other way around (`WATCH_CALL(); EXPECT(InkCheck);`) as an alternative.
+ - Trouble in SquareFlexibleCase - see issue #12
+   - Then, since this is the best way to deal with InkCheck(), give this example first (i.e. `EXPECT(InkCheck); WATCH_CALL();`) and then the other way around (`WATCH_CALL(); EXPECT(InkCheck);`) as an alternative.
+ - This doc needs an "info box" to explain the difference between: exterior filtering, interior filtering and just accepting every call and checking it. It should define "see" and "seen" in Cotest terminology.
+ - We can leave the actual contents of the WAIT_X() mecros to the server style doc, however.
+
+### Remaining sections
+ - Section on RandomPointOnCircle which demonstrates GetArg<>()
+ - Section on MultiLaunch which demonstrates _FROM etc
+ - We should finish by discussing the mutex example and then linking to it.
