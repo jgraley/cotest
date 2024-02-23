@@ -332,7 +332,7 @@ From comments in the code, here is a description of the deliberate bug we have i
      */
 ```
 
-We find the problem using Cotest:
+We find the problem using a succession of Cotest test cases:
  - First giving the mutex the most unsurprising behaviour (lock aquired immediately).
  - Next we make the behaviour more and more surprising while never coding a behaviour that would be illegal for the mutex.
  - We keep going until we've made test cases that excercise all the surprising but legal corner cases.
