@@ -95,10 +95,8 @@ Please see [the test case for the examples](/coroutines/test/examples-for-docs.c
 
 In order to be able to handle a mock call inside a coroutine, it needs to be able to _see_ the call. This is achieved using `WAITCH_CALL()`. If a call is made that we cannot see, Google Mock will treat it as an unhandled mock call. 
 
-If we are using a `WAIT_FOR_` macro to wait for a particular call (or launch result), any non-matching mock call will be _dropped_ and Google Mock will again treat the call as unhandled (even though the coroutine did see the call). Once the macro returns a handle (which will always be valid), we say the coroutine has _accepted_ the call.
-
 Let's call a code-under-test function that makes a mock call. We will 
- - Inject a dependency onto our mock object by passing a pointer to it to the code-under-test.
+ - Inject a dependency onto our mock object by passing a pointer to the code-under-test.
  - Make sure Cotest can see mock calls using `WATCH_CALL()`
  - The test proceeds as seen above apart from the inclusion of mock handling code.
 
@@ -159,19 +157,12 @@ COTEST(PainterTest, GoToPoint2)
 ```
 The more restrictive forms of `WATCH_CALL()` will prevent the coroutine from seeing calls that don't match. These calls will then be dealt with by Google Mock in the same way as a call that has no matching `EXPECT_CALL()`. Indeed, `WATCH_CALL()` is the Cotest counterpart to `EXPECT_CALL()`. 
 
-> [!TIP]
-> In summry, there are three ways of "filtering" mock calls:
-> 1. Arguments passed to `WATCH_CALL()` - this is called _exterior filtering_ and limits what the coroutine can _see_.
-> 2. Aruments passed to `WAIT_FOR_CALL()` - this is called _interior filtering_ and limits what the coroutine will _accept_.
-> 3. Checking using `EXPECT_` macros and `IS_CALL()` etc
-> 
-> In the first two cases, GMock may in fact be able to handle the call in [another way](/coroutines/docs/working-with-gmock.md).
 
 #### Mock return affects behaviour example
 
-To consolidate, let's try using Cotest for a case where the return values we supply to mock calls will affect behaiour of the code-under-test. In this case, the code-under-test stops calling `GetX()` or `GetY()` as soon as one of them returns a co-ordinate that is out of range.
+Let's try using Cotest for a case where the return values we supply to mock calls will affect behaiour of the code-under-test. In this case, the code-under-test stops calling `GetX()` or `GetY()` as soon as one of them returns a co-ordinate that is out of range. 
 
-Because we will return a value from our mock calls, we need to provide details of the expected call to Cotest by using for example `WAIT_FOR_CALL(mock_turtle, GetX)`. This allows Cotest to determine the _signature_ of the call, and hence its _return type_. 
+Because we will return a value from our mock calls, we need to provide details of the expected call to Cotest by using for example `WAIT_FOR_CALL(mock_turtle, GetX)`. This allows Cotest to determine the _signature_ of the call, and hence its _return type_. If we are using a `WAIT_FOR_` macro to wait for a particular call (or launch result), any non-matching mock call will be _dropped_ and Google Mock will treat the call as unhandled (even though the coroutine did see the call). Once the macro returns a handle (which will always be valid), we say the coroutine has _accepted_ the call.
 
 ```
 COTEST(PainterTest, CheckPosition)
@@ -198,6 +189,14 @@ COTEST(PainterTest, CheckPosition)
 This example demonstrates Cotest's _linearity_ property: information showing to how the test will function as it runs is laid out in time order, form first to last. Stimulus (in this case return values of mock calls) appears immediately before checking (of the necxt event: either a mock call to `GoTo()` or completion of the launch.
 
 Of course, the user is free to break linearity by adding loops or function calls to the test body. _Please note that function calls containing any of the upper-case Cotest commands will usually not be compatible with C++20 coroutines when support for these is added._
+
+> [!TIP]
+> In summary, there are three ways of "filtering" mock calls:
+> 1. Arguments passed to `WATCH_CALL()` - this is called _exterior filtering_ and limits what the coroutine can _see_.
+> 2. Aruments passed to `WAIT_FOR_CALL()` - this is called _interior filtering_ and limits what the coroutine will _accept_.
+> 3. Checking using `EXPECT_` macros and `IS_CALL()` etc
+> 
+> In the first two cases, GMock may in fact be able to handle the call in [another way](/coroutines/docs/working-with-gmock.md).
 
 #### Get mock call argument example
 
