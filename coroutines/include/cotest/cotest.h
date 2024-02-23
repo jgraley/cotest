@@ -29,7 +29,13 @@ namespace testing {
 // Covers 0-arg and 1-arg cases including unprotected commas.
 #define RETURN(...) Return(__VA_ARGS__)
 
-// See also MOCK_CALL_HANDLE, IS_CALL and WAIT_FOR_CALL below
+// NULL call session for any mock call with signature matching the supplied mock
+// method
+#define SIGNATURE_HANDLE(OBJ, METHOD) \
+    (::testing::internal::CreateSignatureHandle(std::move(GMOCK_GET_MOCKSPEC(OBJ, METHOD, gmockq))))
+// Can also use SignatureHandle<SIGNATURE> where SIGNATURE is eg int(void *)
+
+// See also IS_CALL and WAIT_FOR_CALL below, and the XHandle classes
 
 // ------------------ launch session -------------------------
 
@@ -109,23 +115,6 @@ namespace testing {
 // Wildcard version: any mocked call
 #define WATCH_CALL_ARG_0() cotest_coro_->WatchCall(__FILE__, __LINE__)
 
-// ------------------ variadic MOCK_CALL_HANDLE() ------------------
-
-#define MOCK_CALL_HANDLE(...) COTEST_PP_VARIADIC_CALL(MOCK_CALL_HANDLE_ARG_, __VA_ARGS__)
-
-// NULL session for any mock call
-#define MOCK_CALL_HANDLE_ARG_0() (::testing::EventHandle())
-
-// No different than MOCK_CALL_HANDLE() - not for human use, only consistency.
-#define MOCK_CALL_HANDLE_ARG_1(OBJ) (::testing::EventHandle())
-
-// NULL call session for any mock call with signature matching the supplied mock
-// method
-#define MOCK_CALL_HANDLE_ARG_2(OBJ, METHOD) \
-    (::testing::internal::CreateSignatureHandle(std::move(GMOCK_GET_MOCKSPEC(OBJ, METHOD, gmockq))))
-
-// Can also use SignatureHandle<SIGNATURE> where SIGNATURE is eg int(void *)
-
 // ------------------ variadic IS_CALL() ------------------
 
 #define IS_CALL(...) COTEST_PP_VARIADIC_CALL(IS_CALL_ARG_, __VA_ARGS__)
@@ -173,7 +162,7 @@ namespace testing {
 // session.
 
 #define WAIT_FOR_CALL_NSE_ARG_3(CS, OBJ, METHOD)   \
-    auto CS = MOCK_CALL_HANDLE_ARG_2(OBJ, METHOD); \
+    auto CS = SIGNATURE_HANDLE(OBJ, METHOD);       \
     do {                                           \
         auto cg_ = NEXT_EVENT();                   \
         CS = cg_.IS_CALL_ARG_2(OBJ, METHOD);       \
@@ -194,7 +183,7 @@ namespace testing {
 // session.
 
 #define WAIT_FOR_CALL_NSE_ARG_2(CG, OBJ) \
-    auto CG = MOCK_CALL_HANDLE_ARG_0();  \
+    ::testing::MockCallHandle CG;        \
     do {                                 \
         auto cg_ = NEXT_EVENT();         \
         CG = cg_.IS_CALL_ARG_1(OBJ);     \
@@ -214,7 +203,7 @@ namespace testing {
 // session.
 
 #define WAIT_FOR_CALL_NSE_ARG_1(CG)     \
-    auto CG = MOCK_CALL_HANDLE_ARG_0(); \
+    ::testing::MockCallHandle CG;       \
     do {                                \
         auto cg_ = NEXT_EVENT();        \
         CG = cg_.IS_CALL_ARG_0();       \
@@ -238,7 +227,7 @@ namespace testing {
 
 // As above, but from given lauch session only
 #define WAIT_FOR_CALL_FROM_NSE_ARG_4(CS, OBJ, METHOD, DS) \
-    auto CS = MOCK_CALL_HANDLE_ARG_2(OBJ, METHOD);        \
+    auto CS = SIGNATURE_HANDLE(OBJ, METHOD);              \
     do {                                                  \
         auto cg_ = NEXT_EVENT();                          \
         CS = cg_.IS_CALL_ARG_2(OBJ, METHOD).From(DS);     \
@@ -256,7 +245,7 @@ namespace testing {
 
 // As above, but from given lauch session only
 #define WAIT_FOR_CALL_FROM_NSE_ARG_3(CG, OBJ, DS) \
-    auto CG = MOCK_CALL_HANDLE_ARG_0();           \
+    ::testing::MockCallHandle CG;                 \
     do {                                          \
         auto cg_ = NEXT_EVENT();                  \
         CG = cg_.IS_CALL_ARG_1(OBJ).From(DS);     \
@@ -270,12 +259,12 @@ namespace testing {
         cg;                                        \
     })
 
-// ------------------- Any call -----------------------
+// ------------------- Any call from -----------------------
 
 // As above, but from given lauch session only
 
 #define WAIT_FOR_CALL_FROM_NSE_ARG_2(CG, DS) \
-    auto CG = MOCK_CALL_HANDLE_ARG_0();      \
+    ::testing::MockCallHandle CG;            \
     do {                                     \
         auto cg_ = NEXT_EVENT();             \
         CG = cg_.IS_CALL_ARG_0().From(DS);   \
@@ -293,7 +282,7 @@ namespace testing {
 
 // Wait for a completed launch, dropping mock calls
 #define WAIT_FOR_RESULT_NSE(CG)         \
-    auto CG = ::testing::EventHandle(); \
+    ::testing::ResultHandle CG;         \
     do {                                \
         auto cg_ = NEXT_EVENT();        \
         CG = cg_.IS_RESULT_ARG_0();     \
@@ -304,6 +293,23 @@ namespace testing {
     ({                           \
         WAIT_FOR_RESULT_NSE(cg); \
         cg;                      \
+    })
+
+// ---------------- wait for result from ------------------
+
+// Wait for a completed launch, dropping mock calls
+#define WAIT_FOR_RESULT_FROM_NSE(CG, DS)     \
+    ::testing::ResultHandle CG;              \
+    do {                                     \
+        auto cg_ = NEXT_EVENT();             \
+        CG = cg_.IS_RESULT_ARG_0().From(DS); \
+        if (!CG) cg_.DROP();                 \
+    } while (!CG);
+
+#define WAIT_FOR_RESULT_FROM(DS)          \
+    ({                                    \
+        WAIT_FOR_RESULT_FROM_NSE(cg, DS); \
+        cg;                               \
     })
 
 // ---------------------- COTEST ---------------------------
@@ -391,6 +397,7 @@ class EventHandle {
 
 // Allow user to be more explicit about what they need
 using MockCallHandle = EventHandle;
+using ResultHandle = EventHandle;
 
 // Handle for a mock call session when the function type is known. Templated
 // on the function type eg int(char *)

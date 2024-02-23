@@ -289,7 +289,7 @@ InteriorMockCallSession::InteriorMockCallSession(TestCoroutine *test_coroutine_,
 {}
 
 InteriorMockCallSession::~InteriorMockCallSession() {
-    COTEST_ASSERT(state == State::PreMock || state == State::Dropped || state == State::Returned);
+    COTEST_ASSERT((state == State::PreMock || state == State::Dropped || state == State::Returned) && "in call session destructor");
 }
 
 std::string InteriorMockCallSession::GetName() const { return name; }

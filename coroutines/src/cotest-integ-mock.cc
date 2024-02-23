@@ -44,7 +44,7 @@ Coroutine::~Coroutine() {
             std::clog << "Cancelling a satisfied coroutine " << crf->GetName() << " - this is not an error."
                       << std::endl;
         else
-            std::clog << "Cancelling an unsatisfied coroutine " << crf->GetName() << " - this will cause test failure."
+            std::cerr << "Cancelling an unsatisfied coroutine " << crf->GetName() << " - this will cause test failure."
                       << std::endl;
     }
 
