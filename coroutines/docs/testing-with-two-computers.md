@@ -55,4 +55,4 @@ We are also interested in the speed with which we can pass these messages. Unit 
 
 This is where coroutines come in. These do not support concurrency, and as a result can usually exist without the involvement of an operating system. With coroutines, it is natural to bind message-passing with switching context-of-execution, so that both occur as a single event. This can require only "a handful" of machine instructions. So we will plan to use coroutines in the test framework: everything will happen on a single thread and a single core, of a single computer. What remains of the above exercise is the delineation of roles: there will be a coroutine that runs the test case, and another that runs the code-under-test.
 
-[^1]: The machine shown is a PDP-11/35 minicomputer system which does in fact support timesharing. You would not need two of them to run cotest!
+[^1]: The machine shown is a PDP-11/35 minicomputer system which does in fact support timesharing. You would not need two of them to run Cotest!
