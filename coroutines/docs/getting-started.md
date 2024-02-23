@@ -19,14 +19,13 @@ class MyClass {
 ```
 In most testing frameworks, we would simply call the methods on an instance of the class, and check the return value and/or side effects. 
 
-#### Simple example
-
 In Cotest, this call is replaced by two steps: we _launch_ the code-under-test, and then we _wait_ for the launch to complete.
 
 This is accomplished as follows:
  - To launch, we use `LAUNCH( <expression> )` which returns a _launch handle_.
  - To wait for completion, we use `WAIT_FOR_RESULT()` which returns a _result handle_.
 
+#### Simple example
 ```
 COTEST(MyTest, Case1) {
     MyClass my_instance;
@@ -41,9 +40,9 @@ Note that:
  1. `LaunchHandle` is templated on the result type, which is the `decltype()` of the supplied expression.
  2. To extract the actual return value, we use function call syntax, combining the two handles: `result(launch)`
 
-#### More compact example
-
 To save typing, we can use `auto` for handles. We can also make the extraction of return value more compact. So we could write simply
+
+#### More compact example
 ```
 COTEST(MyTest, Case1) {
     MyClass my_instance;
@@ -52,12 +51,12 @@ COTEST(MyTest, Case1) {
     EXPECT_EQ( WAIT_FOR_RESULT()(l), 72 );
 }
 ```
-#### Void return and ref argument example
 
 Let's vary things a bit. This time, the function we call
  - will have void return, and
  - will take a reference (and cause a side-effect through it).
 
+#### Void return and ref argument example
 ```
 COTEST(MyTest, Case2)
 {
@@ -74,10 +73,9 @@ COTEST(MyTest, Case2)
 
 We can see that the code under test has successfully modfied our local variable `i`. Thus, Cotest respects reference arguments to launches.
 
-#### Arbitrary expression example
-
 The `LAUNCH()` macro takes an expression, and this does not need to be of the form `<object>.<method>(<args>)`. For example, we can test an operator using its intended syntax:
 
+#### Arbitrary expression example
 ```
 COTEST(MyTest, Case3)
 {
@@ -91,8 +89,6 @@ COTEST(MyTest, Case3)
 
 Mocking assets (mock object and interface class) are built just the same way as with Google Mock. Please see [the test case for the examples](/coroutines/test/examples-for-docs.cc) for code-under-test and mocking assets - this way we can concentrate on the Cotest test cases.
 
-#### Test with a mock call example
-
 Let's call a code-under-test function that makes a mock call. 
 
 In order to be able to handle a mock call inside a coroutine, it needs to be able to _see_ the call. This is achieved using `WAITCH_CALL()`. If a call is made that we cannot see, Google Mock will treat it as an unhandled mock call. 
@@ -102,6 +98,7 @@ We will:
  - Make sure Cotest can see mock calls using `WATCH_CALL()`
  - The test proceeds as seen above apart from the inclusion of mock handling code.
 
+#### Test with a mock call example
 ```
 COTEST(PainterTest, GoToPoint)
 {
@@ -137,10 +134,9 @@ In place of `WATCH_CALL()` we could have used:
  - `WATCH_CALL(mock_turtle, GoTo(_, 1))` or
  - `WATCH_CALL(mock_turtle, GoTo(_, _)).With(Gt())` to only see calls with acceptable arguments.
 
+In the case of `WATCH_CALL(mock_turtle, GoTo(_, 1))`, we would not need to check inside the coroutine and could use just
 
 #### Filtering calls in the watch example
-
-In the case of `WATCH_CALL(mock_turtle, GoTo(_, 1))`, we would not need to check inside the coroutine and could use just
 ```
 COTEST(PainterTest, GoToPoint2)
 {
@@ -159,13 +155,11 @@ COTEST(PainterTest, GoToPoint2)
 ```
 The more restrictive forms of `WATCH_CALL()` will prevent the coroutine from seeing calls that don't match. These calls will then be dealt with by Google Mock in the same way as a call that has no matching `EXPECT_CALL()`. Indeed, `WATCH_CALL()` is the Cotest counterpart to `EXPECT_CALL()`. 
 
-
-#### Mock return affects behaviour example
-
 Let's try using Cotest for a case where the return values we supply to mock calls will affect behaiour of the code-under-test. In this case, the code-under-test stops calling `GetX()` or `GetY()` as soon as one of them returns a co-ordinate that is out of range. 
 
 Because we will return a value from our mock calls, we need to provide details of the expected call to Cotest by using for example `WAIT_FOR_CALL(mock_turtle, GetX)`. This allows Cotest to determine the _signature_ of the call, and hence its _return type_. 
 
+#### Mock return affects behaviour example
 ```
 COTEST(PainterTest, CheckPosition)
 {
@@ -194,10 +188,9 @@ This example demonstrates Cotest's _linearity_ property: information showing to 
 
 Of course, the user is free to break linearity by adding loops or function calls to the test body. _Please note that function calls containing any of the upper-case Cotest commands will usually not be compatible with C++20 coroutines when support for these is added._
 
-#### Get mock call argument example
-
 To get mock call arguments with the correct type, we must specify the mock object and method using `WAIT_FOR_CALL(<object>, <method>)` or `IS_CALL(<object>, <method>)`. We can then use the returned handle (which we call a _signature handle_) to extract arguments with the correct type. We use `GetArg<>()` for this - it is templated on the argument number, beginning at zero.
 
+#### Get mock call argument example
 ```
 COTEST(PainterTest, RandomPointOnCircle)
 {
@@ -225,10 +218,9 @@ COTEST(PainterTest, RandomPointOnCircle)
 
 ## Algoithmic mock handling
 
-#### Loop inside test case example
-
 Here we give an example of a Cotest test containing a loop
 
+#### Loop inside test case example
 ```
 COTEST(PainterTest, Square)
 {
@@ -249,10 +241,9 @@ COTEST(PainterTest, Square)
 ```
 Cotest helps us to paint a picture of an expectation that is "framed" by `PenDown()` and `PenUp()` and also contains a loop with a slightly non-trival body (two mock calls).
 
+Suppose we decide that continuing to turn by 90 degrees and draw another line is acceptable as long as it only over-paints lines that are already drawn. In Cotest, we will want to change the behaviour of the test case, based upon the _events_ (mock calls or launch completions) we receive.
+
 #### Flexible test example
-
-Suppose we decide that continuing to turn by 90 degrees and draw another line is acceptable as long as it only over-paints what was already there. In Cotest, we will want to change the behaviour of the test case, based upon the _events_ (mock calls or launch completions) we receive.
-
 ```
 COTEST(PainterTest, SquareFlexibleCase)
 {
@@ -286,11 +277,10 @@ An important feature of Cotest is the ability to launch the code-under-test more
  - Mock calls
  - Completion of the launch
 
-#### Multi-launch example
-
 We will launch `DrawDot()` which makes two mock calls, but while the first of these is waiting for us to instruct Cotest to let it return,
 we will launch `EmptyMethod()` which will return immediately.
 
+#### Multi-launch example
 ```
 COTEST(PainterTest, MultiLaunch)
 {
@@ -313,7 +303,7 @@ COTEST(PainterTest, MultiLaunch)
 Notice the use of `WAIT_FOR_CALL_FROM()` in this example. The third argument specifies the launch session the call should come from, making for a stricter filtering criterion. 
 Now that we are using more than one of these, it can be advisable to use this form. The function `From(launch)` may be used on any event, mock call or result handle to check whether it originated from the given launch session.
 
-#### Mutex examples
+## Mutex example
 
 We can now look at a more complete example in which we test some code that uses a mutex to protect its data. This code has a deliberate error built into it - an assumption is made about how mutexes will behave, which isn't true.
 
