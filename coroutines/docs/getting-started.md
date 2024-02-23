@@ -306,13 +306,29 @@ COTEST(PainterTest, MultiLaunch)
 Notice the use of `WAIT_FOR_CALL_FROM()` in this exmaple. The third argument specifies the launch session the call should come from, making for a stricter filtering criterion. 
 Now that we are using more than one of these, it can be advisable to use this form. The function `From(launch)` may be used on any event, mock call or result handle to check whether it originated from the given launch session.
 
+#### Mutex examples
 
+We can now look at a more complete set of Cotest test cases in which we test some code that uses a mutex to protect its data. This code has a deliberate error built into it - an assumption is made about how mutexes will behave, which isn't true.
 
+To test this we mock the mutex's `lock()` and `unlock()` operations and launch the core-under-test twice to simualte the existence of two threads.
 
+> [!IMPORTANT]
+> Cotest launches are not concurrent. Therefore, a Cotest test will never be a full test of thread safety. It is recommended to use a tool such as thread saniotisers or valgrind. So:
+>  - That tool is checking for undefined behaviour in the code which would not be repeatable.
+>  - Once this has passed and it _is_ repeatable, Cotest is testing the _logic_ of the code.
 
+Please see [the code](coroutines/test/cotest-mutex.cc).
 
-# TODO
- - We can leave the actual contents of the WAIT_X() macros to the server style doc, however.
+From comments in the code, here is a description of the deliberate bug we have introoduced for Cotest to discover:
 
-### Remaining sections
- - We should finish by discussing the mutex example and then linking to it.
+> The problem with this class:
+> We know that Example1() is always called before Example2(), so
+> we only need to test with that scenario. The implementation anticipates
+> the "medium" difficulty case, in which the methods overlap and
+> Example2() has started to run and then been blocked on the
+> mutex by Example1(), by placing the var_x increment
+> in Example2() at the end, apparently forcing the correct
+> sequence of events. But this is wrong, and the "hard" test case
+> discovers the problem.
+
+We find the problem using Cotest by first giving the mutex the most unsurprising behaviour (lock aquired immediately absent contention) and then we make the behaviour more and more surprising while never coding a behaviour that would be illegal for the mutex. The assumption that Method1 is always started first is deliberately vague, and only serves to simplify the example.
