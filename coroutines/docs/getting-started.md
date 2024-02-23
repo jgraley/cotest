@@ -126,7 +126,7 @@ To handle the mock:
 > Valid handles evaluate to `true`.
 > `IS_CALL()` and similar checking functions return the same (valid) handle on match and a null handle on false.
 > It is _not_ an error to invoke checking functions on null handles - they will just return another null handle.
-> This allows us to chain checking functions, and we get an _and_-rule.
+> This allows us to chain checking functions, and we get an _and-rule_.
 
 In place of `WATCH_CALL()` we could have used:
  - `WATCH_CALL(mock_turtle)` to only see calls to that mock object or
