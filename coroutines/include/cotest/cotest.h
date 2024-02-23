@@ -389,6 +389,9 @@ class EventHandle {
     std::shared_ptr<crf::InteriorEventSession> crf_es;
 };
 
+// Allow user to be more explicit about what they need
+using MockCallHandle = EventHandle;
+
 // Handle for a mock call session when the function type is known. Templated
 // on the function type eg int(char *)
 template <typename R, typename... Args>
