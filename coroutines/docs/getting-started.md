@@ -313,7 +313,7 @@ We can now look at a more complete example in which we test some code that uses 
 To test this we mock the mutex's `lock()` and `unlock()` methods and launch the core-under-test twice to simulate the existence of two threads. We create multiple test cases that together explore possible behaviours of the mutex.
 
 > [!IMPORTANT]
-> Cotest launches are not concurrent. Therefore, a Cotest test will never be a full test of thread safety. It is recommended to use a tool such as Thread Sanitiser or Valgrind. So:
+> Cotest launches are not concurrent. Therefore, a Cotest test will never be a full test of thread safety. It is recommended to use a tool such as Thread Sanitiser or Valgrind. Then:
 >  - That tool is checking for undefined behaviour in the code which would not be repeatable.
 >  - Once this has passed and it _is_ repeatable, Cotest is testing the _logic_ of the code.
 
@@ -333,7 +333,7 @@ From comments in the code, here is a description of the deliberate bug we have i
 ```
 
 We find the problem using Cotest:
- - First giving the mutex the most unsurprising behaviour (lock aquired immediately absent contention).
+ - First giving the mutex the most unsurprising behaviour (lock aquired immediately).
  - Next we make the behaviour more and more surprising while never coding a behaviour that would be illegal for the mutex.
  - We keep going until we've made test cases that excercise all the surprising but legal corner cases.
 
