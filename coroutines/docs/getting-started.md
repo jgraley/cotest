@@ -310,7 +310,7 @@ Now that we are using more than one of these, it can be advisable to use this fo
 
 We can now look at a more complete example in which we test some code that uses a mutex to protect its data. This code has a deliberate error built into it - an assumption is made about how mutexes will behave, which isn't true.
 
-To test this we mock the mutex's `lock()` and `unlock()` methods and launch the core-under-test twice to simulate the existence of two threads. We create multiple test cases that together explore possible behaviours of the mutex.
+To test this we mock the mutex's `lock()` and `unlock()` methods and launch the code-under-test twice to simulate the existence of two threads. We create multiple test cases that together explore possible behaviours of the mutex.
 
 > [!IMPORTANT]
 > Cotest launches are not concurrent. Therefore, a Cotest test will never be a full test of thread safety. It is recommended to use a tool such as Thread Sanitiser or Valgrind. Then:
