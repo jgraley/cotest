@@ -184,9 +184,12 @@ COTEST(PainterTest, CheckPosition)
 ```
 Here we are using `WAIT_FOR_` macros to wait for particular calls (or launch result). Any non-matching mock call will be _dropped_ and Google Mock will treat the call as unhandled (even though the coroutine did see the call). Once the macro returns a handle (which will always be valid), we say the coroutine has _accepted_ the call. Since we are checking mock calls this way, we can use simply `WATCH_CALL()` to ensure we see them. 
 
-This example demonstrates Cotest's _linearity_ property: information showing to how the test will function as it runs is laid out in time order, form first to last. Stimulus (in this case return values of mock calls) appears immediately before checking (of the necxt event: either a mock call to `GoTo()` or completion of the launch.
-
-Of course, the user is free to break linearity by adding loops or function calls to the test body. _Please note that function calls containing any of the upper-case Cotest commands will usually not be compatible with C++20 coroutines when support for these is added._
+> [!NOTE]
+> This example demonstrates Cotest's _linearity_ property: the test case code is laid out in time order, from first to last event. Stimulus (in this case return values of mock calls) appears immediately before checking (of the next event: either a mock call to `GoTo()` or completion of the launch.
+>
+> Of course, the user is free to break linearity by adding loops or worker functions/lambdas to the test body.
+>
+> _Please note that worker functions/lambdas containing any of the upper-case Cotest commands will usually not be compatible with C++20 coroutines when support for these is added._
 
 To get mock call arguments with the correct type, we must specify the mock object and method using `WAIT_FOR_CALL(<object>, <method>)` or `IS_CALL(<object>, <method>)`. We can then use the returned handle (which we call a _signature handle_) to extract arguments with the correct type. We use `GetArg<>()` for this - it is templated on the argument number, beginning at zero.
 
