@@ -92,9 +92,11 @@ Please see [the test case for the examples](/coroutines/test/examples-for-docs.c
 
 #### Test with a mock call example
 
+In order to be able to handle a mock call inside a coroutine, we needs to be able to _see_ the call. If a call is made that we cannot see, Google Mock will treat it as an unhandled mock call. If we can see the call, we still may not handle it. If we are _waiting_ for a particular call (or launch result), any other mock call will again be an unhandled mock call.
+
 Let's call a code-under-test function that makes a mock call. We will 
  - Inject a dependency onto our mock object by passing a pointer to it to the code-under-test.
- - Make sure Cotest can _see_ mock calls using `WATCH_CALL()`
+ - Make sure Cotest can see mock calls using `WATCH_CALL()`
  - The test proceeds as seen above apart from the inclusion of mock handling code.
 
 ```
@@ -122,13 +124,16 @@ To handle the mock:
 > [!TIP]
 > Handles are nullable types, which means they have a null value which evaluates to `false` when used as a boolean.
 > Valid handles evaluate to `true`.
-> `IS_CALL()` and similar functions return the same (valid) handle on match and a null handle on false.
-> It is _not_ an error to invoke functions on null handles - they will just return another null handle, introducing an _and_-rule.
+> `IS_CALL()` and similar checking functions return the same (valid) handle on match and a null handle on false.
+> It is _not_ an error to invoke checking functions on null handles - they will just return another null handle.
+> This allows us to chain checking functions, and we get an _and_-rule.
 
 In place of `WATCH_CALL()` we could have used:
  - `WATCH_CALL(mock_turtle)` to only see calls to that mock object or
  - `WATCH_CALL(mock_turtle, GoTo)` to only see calls to that method, or for example
- - `WATCH_CALL(mock_turtle, GoTo(_, 1))` to only see acceptible calls.
+ - `WATCH_CALL(mock_turtle, GoTo(_, 1))` or
+ - WATCH_CALL(mock_turtle, GoTo(_, _)).With(Gt())` to only see calls with acceptable arguments.
+
 
 #### Filtering calls in the watch example
 
@@ -149,7 +154,14 @@ COTEST(PainterTest, GoToPoint2)
     SATISFY(); // Workaround issue #11
 }
 ```
-The more restrictive forms of `WATCH_CALL()` will prevent the coroutine from "seeing" calls that don't match. These calls will then be dealt with by Google Mock in the same way as a call that has no matching `EXPECT_CALL()`. Indeed, `WATCH_CALL()` is the Cotest counterpart to `EXPECT_CALL()`.
+The more restrictive forms of `WATCH_CALL()` will prevent the coroutine from seeing calls that don't match. These calls will then be dealt with by Google Mock in the same way as a call that has no matching `EXPECT_CALL()`. Indeed, `WATCH_CALL()` is the Cotest counterpart to `EXPECT_CALL()`. 
+
+> [!TIP]
+> In summry, there are three ways of "filtering" mock calls:
+> 1. Arguments passed to `WATCH_CALL()` - this is called _exterior filtering_ and limits what the coroutine can _see_.
+> 2. Aruments passed to `WAIT_FOR_CALL()` - this is called _interior filtering_ and limits what the coroutine will _accept_.
+> 3. Checking using `EXPECT_` macros and `IS_CALL()` etc
+> In the first two cases, GMock may in fact be able to handle the call in [another way](/coroutines/docs/working-with-gmock.md).
 
 #### Mock return affects behaviour example
 
@@ -182,6 +194,29 @@ COTEST(PainterTest, CheckPosition)
 This example demonstrates Cotest's _linearity_ property: information showing to how the test will function as it runs is laid out in time order, form first to last. Stimulus (in this case return values of mock calls) appears immediately before checking (of the necxt event: either a mock call to `GoTo()` or completion of the launch.
 
 Of course, the user is free to break linearity by adding loops or function calls to the test body. _Please note that function calls containing any of the upper-case Cotest commands will usually not be compatible with C++20 coroutines when support for these is added._
+
+#### Get mock call argument example
+
+To get mock call arguments with the correct type, we must specify the mock object and method using `WAIT_FOR_CALL()` or `IS_CALL()`. We can then use the returned handle (which we call a _signature handle_) to extract arguments with the correct type. We use `GetArg<>()` for this - it is templated on the argument number, beginning at zero.
+
+For example
+
+```
+COTEST(PainterTest, RandomPointOnCircle)
+{
+    MockTurtle mock_turtle;
+    Painter painter(&mock_turtle);
+    WATCH_CALL();
+
+    auto l = LAUNCH( painter.GoToRandomPointOnCircle(1000) );
+    auto c = WAIT_FOR_CALL(mock_turtle, GoTo);
+    float radius_sq = c.GetArg<0>() * c.GetArg<0>() +
+                      c.GetArg<1>() * c.GetArg<1>();                            
+    EXPECT_NEAR( radius_sq, 1000*1000, 1000 );
+    c.RETURN();
+    WAIT_FOR_RESULT();
+}
+```
 
 #### Loop inside test case example
 
@@ -236,55 +271,46 @@ COTEST(PainterTest, SquareFlexibleCase)
     mock_call.RETURN();
     WAIT_FOR_RESULT();
 }
-```
-## Adding expectations to Cotest tests
-[Working With GMock](/coroutines/docs/working-with-gmock.md) will cover interoperation between GMock and Cotest features, but we will dip our toes in here. Suppose we want to allow some number of calls to some new mock call, but the current test case does not need to verify these calls. 
+## Multiple launches
 
-#### Watch then expect example
+An important feature of Cotest is the ability to launch the core-under-test more than once. These will not run concurrantly. Instead, due to the coroutine model, each launch will proceed to the next logical break-point when the test case allows it to. Break points are:
+ - Mock calls
+ - Completion
 
-The solution in GMock is to add a separate expectation for these calls, or use `ON_CALL()`. In Cotest, we can do the same:
+#### Multi-launch example
+
+We will launch `DrawDot()` which makes two mock calls, but while the first of these is waiting for us to instruct Cotest to let it return,
+we will launch `EmptyMethod()` which will return immediately.
+
 ```
-COTEST(PainterTest, SquareInkChecks1)
+COTEST(PainterTest, MultiLaunch)
 {
     MockTurtle mock_turtle;
     Painter painter(&mock_turtle);
     WATCH_CALL();
-    EXPECT_CALL(mock_turtle, InkCheck).WillRepeatedly(Return());
 
-    auto l = LAUNCH( painter.DrawSquareInkChecks(5) );
-    ... From here, same as the previous example ...
+    auto l1 = LAUNCH( painter.DrawDot() );
+    auto c1 = WAIT_FOR_CALL_FROM(mock_turtle, PenDown, l1);
+    
+    auto l2 = LAUNCH( painter.EmptyMethod() );
+    WAIT_FOR_RESULT_FROM(l2);
+
+    c1.RETURN();
+    
+    WAIT_FOR_CALL(mock_turtle, PenUp).RETURN();
+    WAIT_FOR_RESULT_FROM(l1);
+}
 ```
-The new code-under-test method makes calls to `InkCheck()` and we want to absorb them without error. The `EXPECT_CALL()` works as per GMock and will absorb these calls. 
+Notice the use of `WAIT_FOR_CALL_FROM()` in this exmaple. The third argument specifies the launch session the call should come from, making for a stricter filtering criterion. 
+Now that we are using more than one of these, it can be advisable to use this form. The function `From(launch)` may be used on any event, mock call or result handle to check whether it originated from the given launch session.
 
-Since the `EXPECT_CALL()` comes after the `WATCH_CALL()` it has a higher priority. This means the coroutine will not _see_ the call if the expectation handles it, and in this case the expectation handles all calls to `InkCheck()`.
 
-#### Expect then watch example
 
-We could reverse the priorities if we wanted. The test case is interested in four different mock calls but not interested in a fifth, so things get a little unwieldly:
-```
-COTEST(PainterTest, SquareInkChecks2)
-{
-    MockTurtle mock_turtle;
-    Painter painter(&mock_turtle);
-    EXPECT_CALL(mock_turtle, InkCheck).WillRepeatedly(Return());
-    WATCH_CALL(mock_turtle, PenDown);
-    WATCH_CALL(mock_turtle, PenUp);
-    WATCH_CALL(mock_turtle, Forward);
-    WATCH_CALL(mock_turtle, Turn);
-
-    auto l = LAUNCH( painter.DrawSquareInkChecks(5) );
-    ... From here, same as the previous example ...
-```
 
 
 
 # TODO
- - Trouble in SquareFlexibleCase - see issue #12
-   - Then, since this is the best way to deal with InkCheck(), give this example first (i.e. `EXPECT(InkCheck); WATCH_CALL();`) and then the other way around (`WATCH_CALL(); EXPECT(InkCheck);`) as an alternative.
- - This doc needs an "info box" to explain the difference between: exterior filtering, interior filtering and just accepting every call and checking it. It should define "see" and "seen" in Cotest terminology.
- - We can leave the actual contents of the WAIT_X() mecros to the server style doc, however.
+ - We can leave the actual contents of the WAIT_X() macros to the server style doc, however.
 
 ### Remaining sections
- - Section on RandomPointOnCircle which demonstrates GetArg<>()
- - Section on MultiLaunch which demonstrates _FROM etc
  - We should finish by discussing the mutex example and then linking to it.
