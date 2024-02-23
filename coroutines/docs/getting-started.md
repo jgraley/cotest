@@ -116,9 +116,14 @@ COTEST(PainterTest, GoToPoint)
 ```
 To handle the mock:
  - We have used `WAIT_FOR_CALL()` which will give us a mock call handle as soon as the mock call is made.
- - We have checked that the call is correct using `IS_CALL()` which has semantics similar to Google Mock's `EXPECT_CALL()`; a match returns true.
-   - In fact, the same handle is returns and this evaluates to `true` otherwise a null handle is returned, which evaluates to `false`.
+ - We have checked that the call is correct using `IS_CALL()` which has semantics similar to Google Mock's `EXPECT_CALL()`; a match evaluates to `true`.
  - We instruct the mock call to return. `GoTo()` returns void so no value is required. 
+
+> [!TIP]
+> Handles are nullable types, which means they have a null value which evaluates to `false` when used as a boolean.
+> Valid handles evaluate to `true`.
+> `IS_CALL()` and similar functions return the same (valid) handle on match and a null handle on false.
+> It is _not_ an error to invoke functions on null handles - they will just return another null handle, introducing an _and_-rule.
 
 In place of `WATCH_CALL()` we could have used:
  - `WATCH_CALL(mock_turtle)` to only see calls to that mock object or
