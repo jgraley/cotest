@@ -91,7 +91,7 @@ Mocking assets (mock object and interface class) are built just the same way as 
 
 Let's call a code-under-test function that makes a mock call. 
 
-In order to be able to handle a mock call inside a coroutine, it needs to be able to _see_ the call. This is achieved using `WAITCH_CALL()`. If a call is made that we cannot see, Google Mock will treat it as an unhandled mock call. 
+In order to be able to handle a mock call inside a coroutine, it needs to be able to _see_ the call. This is achieved using `WATCH_CALL()`. If a call is made that we cannot see, Google Mock will treat it as an unhandled mock call. 
 
 We will: 
  - Inject a dependency onto our mock object by passing a pointer to the code-under-test.
