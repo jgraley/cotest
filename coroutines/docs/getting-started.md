@@ -303,7 +303,7 @@ COTEST(PainterTest, MultiLaunch)
     WAIT_FOR_RESULT_FROM(l1);
 }
 ```
-Notice the use of `WAIT_FOR_CALL_FROM()` in this example. The third argument specifies the launch session the call should come from, making for a stricter filtering criterion. 
+Notice the use of `WAIT_FOR_CALL_FROM()` in this example. The last argument specifies the launch session the call should come from, making for a stricter filtering criterion. 
 Now that we are using more than one of these, it can be advisable to use this form. The function `From(launch)` may be used on any event, mock call or result handle to check whether it originated from the given launch session.
 
 ## Mutex example
