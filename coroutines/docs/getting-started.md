@@ -308,27 +308,36 @@ Now that we are using more than one of these, it can be advisable to use this fo
 
 #### Mutex examples
 
-We can now look at a more complete set of Cotest test cases in which we test some code that uses a mutex to protect its data. This code has a deliberate error built into it - an assumption is made about how mutexes will behave, which isn't true.
+We can now look at a more complete example in which we test some code that uses a mutex to protect its data. This code has a deliberate error built into it - an assumption is made about how mutexes will behave, which isn't true.
 
-To test this we mock the mutex's `lock()` and `unlock()` operations and launch the core-under-test twice to simualte the existence of two threads.
+To test this we mock the mutex's `lock()` and `unlock()` methods and launch the core-under-test twice to simualte the existence of two threads. We create multiple test cases that together explore possible behaviours of the mutex.
 
 > [!IMPORTANT]
-> Cotest launches are not concurrent. Therefore, a Cotest test will never be a full test of thread safety. It is recommended to use a tool such as thread saniotisers or valgrind. So:
+> Cotest launches are not concurrent. Therefore, a Cotest test will never be a full test of thread safety. It is recommended to use a tool such as Thread Sanitiser or Valgrind. So:
 >  - That tool is checking for undefined behaviour in the code which would not be repeatable.
 >  - Once this has passed and it _is_ repeatable, Cotest is testing the _logic_ of the code.
 
-Please see [the code](coroutines/test/cotest-mutex.cc).
-
 From comments in the code, here is a description of the deliberate bug we have introoduced for Cotest to discover:
 
-> The problem with this class:
-> We know that Example1() is always called before Example2(), so
-> we only need to test with that scenario. The implementation anticipates
-> the "medium" difficulty case, in which the methods overlap and
-> Example2() has started to run and then been blocked on the
-> mutex by Example1(), by placing the var_x increment
-> in Example2() at the end, apparently forcing the correct
-> sequence of events. But this is wrong, and the "hard" test case
-> discovers the problem.
+```
+    /* The problem with this class:
+     * We know that Example1() is always called before Example2(), so
+     * we only need to test with that scenario. The implementation anticipates
+     * the "medium" difficulty case, in which the methods overlap and
+     * Example2() has started to run and then been blocked on the
+     * mutex by Example1(), by placing the var_x increment
+     * in Example2() at the end, apparently forcing the correct
+     * sequence of events. But this is wrong, and the "hard" test case
+     * discovers the problem.
+     */
+```
 
-We find the problem using Cotest by first giving the mutex the most unsurprising behaviour (lock aquired immediately absent contention) and then we make the behaviour more and more surprising while never coding a behaviour that would be illegal for the mutex. The assumption that Method1 is always started first is deliberately vague, and only serves to simplify the example.
+We find the problem using Cotest:
+ - First giving the mutex the most unsurprising behaviour (lock aquired immediately absent contention).
+ - Next we make the behaviour more and more surprising while never coding a behaviour that would be illegal for the mutex.
+ - We keep going until we've made test cases that excercise all the surprising but legal corner cases.
+
+Caveats:
+The assumption that `Example1()` is always started first is deliberately vague, and only serves to simplify the example. A sanitiser or Valgrind might discover the unprotected `var_x` but I beleive the example could be recoded using a second mutex to prevent this while retaining the bug. The bug would then be an assumption about the order in which competing threadsw aquire the two mutexes.
+
+Please see [the Cotest mutex example](coroutines/test/cotest-mutex.cc).
