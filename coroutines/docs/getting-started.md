@@ -271,6 +271,8 @@ COTEST(PainterTest, SquareFlexibleCase)
     mock_call.RETURN();
     WAIT_FOR_RESULT();
 }
+```
+
 ## Multiple launches
 
 An important feature of Cotest is the ability to launch the core-under-test more than once. These will not run concurrantly. Instead, due to the coroutine model, each launch will proceed to the next logical break-point when the test case allows it to. Break points are:
