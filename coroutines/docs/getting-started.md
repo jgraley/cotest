@@ -191,7 +191,7 @@ Here we are using `WAIT_FOR_` macros to wait for particular calls (or launch res
 >
 > _Please note that worker functions/lambdas containing any of the upper-case Cotest commands will usually not be compatible with C++20 coroutines when support for these is added._
 
-To get mock call arguments with the correct type, we must specify the mock object and method using `WAIT_FOR_CALL(<object>, <method>)` or `IS_CALL(<object>, <method>)`. We can then use the returned handle (which we call a _signature handle_) to extract arguments with the correct type. We use `GetArg<>()` for this - it is templated on the argument number, beginning at zero.
+Suppose we wish to get the actual values of mock call arguments. To get them with the correct types, we must specify the mock object and method using `WAIT_FOR_CALL(<object>, <method>)` or `IS_CALL(<object>, <method>)`. We can then use the returned handle (which we call a _signature handle_) to extract arguments with the correct type. We use `GetArg<>()` for this - it is templated on the argument number, beginning at zero.
 
 #### Get mock call argument example
 ```
