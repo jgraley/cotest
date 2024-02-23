@@ -95,7 +95,7 @@ Please see [the test case for the examples](/coroutines/test/examples-for-docs.c
 
 In order to be able to handle a mock call inside a coroutine, it needs to be able to _see_ the call. This is achieved using `WAITCH_CALL()`. If a call is made that we cannot see, Google Mock will treat it as an unhandled mock call. 
 
-If we are using a `WAIT_FOR_` macro to wait for a particular call (or launch result), any non-matching mock call will again be an unhandled mock call even though the coroutine did see the call.
+If we are using a `WAIT_FOR_` macro to wait for a particular call (or launch result), any non-matching mock call will again be an unhandled mock call even though the coroutine did see the call. Once the macro returns a handle (which will always be valid), we say the coroutine has _accepted_ the call.
 
 Let's call a code-under-test function that makes a mock call. We will 
  - Inject a dependency onto our mock object by passing a pointer to it to the code-under-test.
