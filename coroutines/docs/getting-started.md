@@ -219,7 +219,7 @@ COTEST(PainterTest, RandomPointOnCircle)
 > 
 > In the first two cases, GMock may in fact be able to handle the call in [another way](/coroutines/docs/working-with-gmock.md).
 
-## Algoithmic mock handling
+## Algorithmic mock handling
 
 Here we give an example of a Cotest test containing a loop
 
