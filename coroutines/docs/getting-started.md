@@ -338,6 +338,7 @@ We find the problem using a succession of Cotest test cases:
  - We keep going until we've made test cases that excercise all the surprising but legal corner cases.
 
 Caveats:
-The assumption that `Example1()` is always started first is deliberately vague, and only serves to simplify the example. A sanitiser or Valgrind might discover the unprotected `var_x` but I believe the example could be recoded using a second mutex to prevent `var_x`; the bug would then be an assumption about the order in which competing threads acquire the two mutexes.
+ - The assumption that `Example1()` is always started first is deliberately vague, and only serves to simplify the example.
+ - A sanitiser or Valgrind might discover the unprotected `var_x` but I believe the example could be recoded using a second mutex to prevent `var_x`; the bug would then be an assumption about the order in which competing threads acquire the two mutexes.
 
 Please see [the Cotest mutex example](../test/cotest-mutex.cc).
