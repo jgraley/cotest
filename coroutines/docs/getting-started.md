@@ -89,13 +89,15 @@ COTEST(MyTest, Case3)
 ```
 ## Mocking with Cotest
 
-Please see [the test case for the examples](/coroutines/test/examples-for-docs.cc) for code-under-test and mocking assets - this way we can concentrate on the Cotest test cases.
+Mocking assets (mock object and interface class) are built just the same way as with Google Mock. Please see [the test case for the examples](/coroutines/test/examples-for-docs.cc) for code-under-test and mocking assets - this way we can concentrate on the Cotest test cases.
 
 #### Test with a mock call example
 
+Let's call a code-under-test function that makes a mock call. 
+
 In order to be able to handle a mock call inside a coroutine, it needs to be able to _see_ the call. This is achieved using `WAITCH_CALL()`. If a call is made that we cannot see, Google Mock will treat it as an unhandled mock call. 
 
-Let's call a code-under-test function that makes a mock call. We will 
+We will: 
  - Inject a dependency onto our mock object by passing a pointer to the code-under-test.
  - Make sure Cotest can see mock calls using `WATCH_CALL()`
  - The test proceeds as seen above apart from the inclusion of mock handling code.
@@ -162,7 +164,7 @@ The more restrictive forms of `WATCH_CALL()` will prevent the coroutine from see
 
 Let's try using Cotest for a case where the return values we supply to mock calls will affect behaiour of the code-under-test. In this case, the code-under-test stops calling `GetX()` or `GetY()` as soon as one of them returns a co-ordinate that is out of range. 
 
-Because we will return a value from our mock calls, we need to provide details of the expected call to Cotest by using for example `WAIT_FOR_CALL(mock_turtle, GetX)`. This allows Cotest to determine the _signature_ of the call, and hence its _return type_. If we are using a `WAIT_FOR_` macro to wait for a particular call (or launch result), any non-matching mock call will be _dropped_ and Google Mock will treat the call as unhandled (even though the coroutine did see the call). Once the macro returns a handle (which will always be valid), we say the coroutine has _accepted_ the call.
+Because we will return a value from our mock calls, we need to provide details of the expected call to Cotest by using for example `WAIT_FOR_CALL(mock_turtle, GetX)`. This allows Cotest to determine the _signature_ of the call, and hence its _return type_. 
 
 ```
 COTEST(PainterTest, CheckPosition)
@@ -186,23 +188,15 @@ COTEST(PainterTest, CheckPosition)
     WAIT_FOR_RESULT();        
 }
 ```
+Here we are using `WAIT_FOR_` macros to wait for particular calls (or launch result). Any non-matching mock call will be _dropped_ and Google Mock will treat the call as unhandled (even though the coroutine did see the call). Once the macro returns a handle (which will always be valid), we say the coroutine has _accepted_ the call. Since we are checking mock calls this way, we can use simply `WATCH_CALL()` to ensure we see them. 
+
 This example demonstrates Cotest's _linearity_ property: information showing to how the test will function as it runs is laid out in time order, form first to last. Stimulus (in this case return values of mock calls) appears immediately before checking (of the necxt event: either a mock call to `GoTo()` or completion of the launch.
 
 Of course, the user is free to break linearity by adding loops or function calls to the test body. _Please note that function calls containing any of the upper-case Cotest commands will usually not be compatible with C++20 coroutines when support for these is added._
 
-> [!TIP]
-> In summary, there are three ways of "filtering" mock calls:
-> 1. Arguments passed to `WATCH_CALL()` - this is called _exterior filtering_ and limits what the coroutine can _see_.
-> 2. Aruments passed to `WAIT_FOR_CALL()` - this is called _interior filtering_ and limits what the coroutine will _accept_.
-> 3. Checking using `EXPECT_` macros and `IS_CALL()` etc
-> 
-> In the first two cases, GMock may in fact be able to handle the call in [another way](/coroutines/docs/working-with-gmock.md).
-
 #### Get mock call argument example
 
-To get mock call arguments with the correct type, we must specify the mock object and method using `WAIT_FOR_CALL()` or `IS_CALL()`. We can then use the returned handle (which we call a _signature handle_) to extract arguments with the correct type. We use `GetArg<>()` for this - it is templated on the argument number, beginning at zero.
-
-For example
+To get mock call arguments with the correct type, we must specify the mock object and method using `WAIT_FOR_CALL(<object>, <method>)` or `IS_CALL(<object>, <method>)`. We can then use the returned handle (which we call a _signature handle_) to extract arguments with the correct type. We use `GetArg<>()` for this - it is templated on the argument number, beginning at zero.
 
 ```
 COTEST(PainterTest, RandomPointOnCircle)
@@ -220,6 +214,16 @@ COTEST(PainterTest, RandomPointOnCircle)
     WAIT_FOR_RESULT();
 }
 ```
+
+> [!TIP]
+> In summary, there are three ways of "filtering" mock calls:
+> 1. Arguments passed to `WATCH_CALL()` - this is called _exterior filtering_ and limits what the coroutine can _see_.
+> 2. Arguments passed to `WAIT_FOR_CALL()` - this is called _interior filtering_ and limits what the coroutine will _accept_.
+> 3. Checking using `EXPECT_` macros and `IS_CALL()` etc
+> 
+> In the first two cases, GMock may in fact be able to handle the call in [another way](/coroutines/docs/working-with-gmock.md).
+
+## Algoithmic mock handling
 
 #### Loop inside test case example
 
@@ -247,7 +251,7 @@ Cotest helps us to paint a picture of an expectation that is "framed" by `PenDow
 
 #### Flexible test example
 
-Suppose we decide that continuing to turn by 90 degrees and draw another line is acceptable as long as it only over-paints what was already there. In Cotest, we will want to chenge the behaviour of the test case, based upon the _events_ (mock calls or launch completions) we receive.
+Suppose we decide that continuing to turn by 90 degrees and draw another line is acceptable as long as it only over-paints what was already there. In Cotest, we will want to change the behaviour of the test case, based upon the _events_ (mock calls or launch completions) we receive.
 
 ```
 COTEST(PainterTest, SquareFlexibleCase)
@@ -278,9 +282,9 @@ COTEST(PainterTest, SquareFlexibleCase)
 
 ## Multiple launches
 
-An important feature of Cotest is the ability to launch the core-under-test more than once. These will not run concurrently. Instead, due to the coroutine model, each launch will proceed to the next logical break-point when the test case allows it to. Break points are:
+An important feature of Cotest is the ability to launch the code-under-test more than once. These will not run concurrently. Instead, due to the coroutine model, each launch will proceed to the next logical break-point when the test case allows it to. Break points are:
  - Mock calls
- - Completion
+ - Completion of the launch
 
 #### Multi-launch example
 
