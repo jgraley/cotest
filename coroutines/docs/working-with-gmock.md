@@ -16,7 +16,8 @@ How this doc should work
  - Get to multiple coroutines (or is this a different document?)
    - Discuss their priority
    - Clarify that launches are bound but mock calls are not
-   - Show one coro seeing mock calls from another coro's launch 
+   - Show one coro seeing mock calls from another coro's launch
+   - Maybe link to the sheared ordering doc
 
 
 
