@@ -217,7 +217,7 @@ COTEST(PainterTest, RandomPointOnCircle)
 > 2. Arguments passed to `WAIT_FOR_CALL()` - this is called _interior filtering_ and limits what the coroutine will _accept_.
 > 3. Checking using `EXPECT_` macros and `IS_CALL()` etc
 > 
-> In the first two cases, GMock may in fact be able to handle the call in [another way](/coroutines/docs/working-with-gmock.md).
+> In the first two cases, GMock may in fact be able to handle the call in [another way](working-with-gmock.md).
 
 ## Algorithmic mock handling
 
@@ -340,4 +340,4 @@ We find the problem using Cotest:
 Caveats:
 The assumption that `Example1()` is always started first is deliberately vague, and only serves to simplify the example. A sanitiser or Valgrind might discover the unprotected `var_x` but I believe the example could be recoded using a second mutex to prevent `var_x`; the bug would then be an assumption about the order in which competing threads acquire the two mutexes.
 
-Please see [the Cotest mutex example](coroutines/test/cotest-mutex.cc).
+Please see [the Cotest mutex example](../test/cotest-mutex.cc).
