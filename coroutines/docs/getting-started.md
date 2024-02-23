@@ -69,13 +69,14 @@ COTEST(MyTest, Case2)
     EXPECT_EQ( i, 72 );
 }
 ```
-In the case of void return, Cotest requires that we use `WAIT_FOR_RESULT()` or similar, in order to prove that the test case has checked for completion of the launch. This must happen before the launch handle goes out of scope, even though we don't use it directly.
+> [!WARNING]
+> Cotest requires that we use `WAIT_FOR_RESULT()` or similar, in order to prove that the test case has checked for completion of the launch. This must happen before the launch handle goes out of scope, even though we don't use it directly.
 
 We can see that the code under test has successfully modfied our local variable `i`. Thus, Cotest respects reference arguments to launches.
 
 #### Arbitrary expression example
 
-The `LAUNCH()` macro takes an expression, and this does not need to be of the form `<object>.<method(<args>)`. For example, we can test an operator using its intended syntax:
+The `LAUNCH()` macro takes an expression, and this does not need to be of the form `<object>.<method>(<args>)`. For example, we can test an operator using its intended syntax:
 
 ```
 COTEST(MyTest, Case3)
