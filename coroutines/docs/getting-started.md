@@ -93,7 +93,9 @@ Please see [the test case for the examples](/coroutines/test/examples-for-docs.c
 
 #### Test with a mock call example
 
-In order to be able to handle a mock call inside a coroutine, it needs to be able to _see_ the call. If a call is made that we cannot see, Google Mock will treat it as an unhandled mock call. If we are using a `WAIT_FOR_` macro to wait for a particular call (or launch result), any non-matching mock call will again be an unhandled mock call even though the coroutine did see the call.
+In order to be able to handle a mock call inside a coroutine, it needs to be able to _see_ the call. This is achieved using `WAITCH_CALL()`. If a call is made that we cannot see, Google Mock will treat it as an unhandled mock call. 
+
+If we are using a `WAIT_FOR_` macro to wait for a particular call (or launch result), any non-matching mock call will again be an unhandled mock call even though the coroutine did see the call.
 
 Let's call a code-under-test function that makes a mock call. We will 
  - Inject a dependency onto our mock object by passing a pointer to it to the code-under-test.
@@ -133,7 +135,7 @@ In place of `WATCH_CALL()` we could have used:
  - `WATCH_CALL(mock_turtle)` to only see calls to that mock object or
  - `WATCH_CALL(mock_turtle, GoTo)` to only see calls to that method, or for example
  - `WATCH_CALL(mock_turtle, GoTo(_, 1))` or
- - WATCH_CALL(mock_turtle, GoTo(_, _)).With(Gt())` to only see calls with acceptable arguments.
+ - `WATCH_CALL(mock_turtle, GoTo(_, _)).With(Gt())` to only see calls with acceptable arguments.
 
 
 #### Filtering calls in the watch example
