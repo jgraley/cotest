@@ -66,7 +66,7 @@ got the right call inside the coroutine body.
 
 > [!TIP]
 > This is how we can introduce Cotest gradually, or in a limited way, to
-> existing test infrastructure.
+> legacy test cases.
 
 > [!NOTE]
 > `WATCH_CALL` can be understood as Cotest's version of `EXPECT_CALL`:
@@ -84,8 +84,9 @@ coroutine body has exited (we call the coroutine _oversaturated_).
 A coroutine can elect to _retire_ before exit, in which case it will
 be ignored for the purposes of mock call dispatch.
  
-Let's suppose that we only require `DrawDot()` to call `PenDown()` and that
-`PenUp()` is optional.
+Let's suppose that we want the coroutine to handle `PenDown()` and an
+expectation to handle `PenUp()`. One way to do this is to give the coroutine 
+a higher priority but have it retire when it's processd the `PenDown()` message.
 
 #### `RETIRE()` example 
 ```
@@ -104,10 +105,10 @@ TEST(PainterTest, Retire) {
     painter.DrawDot();
 }
 ```
-The wild-carded `WATCH_CALL()` would causes the coroutine to see
+The wild-carded `WATCH_CALL()` causes the coroutine to see
 all mock calls until the coroutine calls `RETIRE()`. After this the
 remaining mock call (`PenUp()`) is not shown to the coroutine so
-the coroutine does not oversaturate. It is handled by the expectation. 
+the coroutine does not oversaturate. 
 
 It is normally an error for a coroutine _not_ to have exited by the
 time the test case completes (we call the coroutine _unsatisfied_).
@@ -115,7 +116,7 @@ We can suppress this error by saying `SATISFIED()` inside the coroutine
 at the point at which further activity should become optional for a
 test to pass.
 
-#### `SATURATE()` example
+#### `SATISFY()` example
 ```
 TEST(PainterTest, Satisfy) {
     MockTurtle mock_turtle;
@@ -152,9 +153,8 @@ as follows:
 ## Multiple Test Coroutines
 
 We can create as many coroutines as we requrire. Each will have its own
-cardinality which we must respect. The priority scheme for mock call dispatch
-will be respected - the last `WATCH_CALL` that matches will see the call
-first and then we work backwards.
+cardinality which we must respect. GMock's priority scheme for mock call dispatch
+will be respected.
 
 #### Example with multiple coroutines
 ```
@@ -183,7 +183,7 @@ handle it.
 Let's try launching from one coroutine and handling one of the resulting mock
 calls in another coroutine.
 
-#### Handle mock in other cortoutine example
+#### Handle mock in other coroutine example
 ```
 TEST(PainterTest, TwoCoroutineLaunch) {
     MockTurtle mock_turtle;
@@ -220,7 +220,7 @@ result.
  
 > [!NOTE]
 > Launch results must always be handled by the lauching coroutine. It is only
-> mock calls that can be handled by any coroutine. This is a natural extension
+> mock calls that can be handled by other coroutines. This is a natural extension
 > of Google Mock's mock handling philosophy.
 
 > [!WARNING]
@@ -234,58 +234,13 @@ result.
 ## Adding expectations to a `COTEST()` case
 
 The `EXPECT_CALL()` macro can also be used in a Cotest test case. We will
-return to [an example from the getting started guide](getting-started.md/#Loop inside test case example)
+return to [an example from the getting started guide](getting-started.md#loop-inside-test-case-example)
 and add to this that the code-under-test will from time to time make a call
-to `InkCheck()`. The ink check calls don't need to occur in any particualr
+to `InkCheck()`. The ink check calls don't need to occur in any particular
 order relative to the mocks we are already checking for, so we would like to use
 a Google Mock `EXPECT_CALL()` to handle them.
 
-#### coro at lower prio example
-
-#### coro at higher prio example
-
-## What about the flexible example
-
-If we require the `WATCH_CALL` to be wild-carded and at a higher priority
-than the `EXPECT_CALL`, we will need to begin using Cotest's [server style
-API](server-style.md). The linked doc begins with this case.
-
-
-
-
-
-
-
-
-
-# Under construction
-
-
-How this doc should work
- - fix up the section ## Adding expectations to Cotest tests and begin with this but provide the whole code snippet (it's truncated in the below)
-   - cover options arounf priority ordering, WATCH_CALL() and "flexible" algo
-   - get to the tricky case, say that server style is needed and link to that doc where the case will be covered.
- - Start using TEST(s,c)-type tests with COROUTINE
-   - Initially just suggest a layout
-   - Touch on NEW_COROUTINE
-   - Discuss launching from main vs from coro and the scope for confusion
- - Now do cardinality
-   - Assumption of saturated+satisfied on exit
-   - SATISFY()
-   - RETIRE() 
- - Get to multiple coroutines (or is this a different document?)
-   - Discuss their priority
-   - Clarify that launches are bound but mock calls are not
-   - Show one coro seeing mock calls from another coro's launch
-   - Maybe link to the sheared ordering doc
-
-
-
-
-## Adding expectations to Cotest tests
-[Working With GMock](/coroutines/docs/working-with-gmock.md) will cover interoperation between GMock and Cotest features, but we will dip our toes in here. Suppose we want to allow some number of calls to some new mock call, but the current test case does not need to verify these calls. 
-
-#### Watch then expect example
+#### Coroutine at lower prio example
 
 The solution in GMock is to add a separate expectation for these calls, or use `ON_CALL()`. In Cotest, we can do the same:
 ```
@@ -297,13 +252,23 @@ COTEST(PainterTest, SquareInkChecks1)
     EXPECT_CALL(mock_turtle, InkCheck).WillRepeatedly(Return());
 
     auto l = LAUNCH( painter.DrawSquareInkChecks(5) );
-    ... From here, same as the previous example ...
+    WAIT_FOR_CALL(mock_turtle, PenDown).RETURN();
+    for( int i=0; i<4; i++ )
+    {
+        WAIT_FOR_CALL(mock_turtle, Forward(5)).RETURN();
+        WAIT_FOR_CALL(mock_turtle, Turn(90)).RETURN();
+    }
+    WAIT_FOR_CALL(mock_turtle, PenUp).RETURN();
+    WAIT_FOR_RESULT();
+}
 ```
+
 The new code-under-test method makes calls to `InkCheck()` and we want to absorb them without error. The `EXPECT_CALL()` works as per GMock and will absorb these calls. 
 
 Since the `EXPECT_CALL()` comes after the `WATCH_CALL()` it has a higher priority. This means the coroutine will not _see_ the call if the expectation handles it, and in this case the expectation handles all calls to `InkCheck()`.
 
-#### Expect then watch example
+#### Coroutine at higher prio example
+
 
 We could reverse the priorities if we wanted. The test case is interested in four different mock calls but not interested in a fifth, so things get a little unwieldly:
 ```
@@ -312,11 +277,14 @@ COTEST(PainterTest, SquareInkChecks2)
     MockTurtle mock_turtle;
     Painter painter(&mock_turtle);
     EXPECT_CALL(mock_turtle, InkCheck).WillRepeatedly(Return());
-    WATCH_CALL(mock_turtle, PenDown);
-    WATCH_CALL(mock_turtle, PenUp);
-    WATCH_CALL(mock_turtle, Forward);
-    WATCH_CALL(mock_turtle, Turn);
+    WATCH_CALL();
 
     auto l = LAUNCH( painter.DrawSquareInkChecks(5) );
     ... From here, same as the previous example ...
 ```
+
+## What about the flexible example
+
+If we require the `WATCH_CALL` to be wild-carded and at a higher priority
+than the `EXPECT_CALL`, we will need to begin using Cotest's [server style
+API](server-style.md). The linked doc begins with this case.
