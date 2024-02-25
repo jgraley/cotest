@@ -141,7 +141,7 @@ COTEST(MutexScenarioTest, Hard) {
     // Permit Example2 to: take the lock, unlock and return
     l2_lock_call.RETURN();  // Example2 gets the lock
     WAIT_FOR_CALL_FROM(mock_mutex, unlock, l2).RETURN();
-    EXPECT_EQ(WAIT_FOR_RESULT()(l2), 11);  // Would be 0 if not for the bug
+    EXPECT_EQ(WAIT_FOR_RESULT()(l2), 11);  // WE HAVE FOUND THE BUG - THIS RETURN VALUE SHOULD BE ZERO
 
     // Example2() has finished while Example1() is still awaiting the mutex, which
     // we now unblock
