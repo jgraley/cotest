@@ -502,8 +502,7 @@ SignatureHandle<R(Args...)> EventHandle::CoTestIsCallImpl_(MockSpec<R(Args...)> 
 
 template <typename RESULT_TYPE>
 EventHandle EventHandle::From(LaunchHandle<RESULT_TYPE> &source) {
-    COTEST_ASSERT(crf_es);
-    bool ok = crf_es->IsFrom(source.GetCRF_());
+    bool ok = crf_es && crf_es->IsFrom(source.GetCRF_());
     return ok ? *this : EventHandle();
 }
 

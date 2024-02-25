@@ -27,7 +27,7 @@ As before, we will assume that a call came from the code-under-test. The compute
 The reason the testing computer is free to do this is that it's the other computer (the one that runs the code-under-test) which is tied up with a function call into that code.
 ![I say "I received this mock call". Inside my test case, I check that the call is correct.](/coroutines/docs/images/cotest_2.png)
 The testing computer will proceed to perform any required action in free-running code, and then send a message to the other computer requesting that the call be returned, including a return value if required.
-![The call was correct! I say "please return this value". I return the mock call.](/coroutines/docs/images/cotest_3.png)
+![The call was correct! I say "please return this value". I return the call.](/coroutines/docs/images/cotest_3.png)
 Again the testing computer will be free to continue execution either immediately or when something happens (an _event_) that is important to it. We will assume that the code-under-test now completes, as before. 
 
 Since the test computer is not waiting for the code-under-test to return, it must instead wait for the message from the other computer confirming that the code-under-test did return, and supplying any return value. It does not have to do this until it _expects_ this to happen. It can now complete the test or start another.

@@ -279,7 +279,6 @@ COTEST(PainterTest, SquareInkChecks2)
 }
 
 
-
 COTEST(PainterTest, RandomPointOnCircle)
 {
     MockTurtle mock_turtle;
@@ -318,7 +317,118 @@ COTEST(PainterTest, MultiLaunch)
 }
 
 
-// ------------- Getting Started --------------
+// ------------- Working with GMock --------------
+
+TEST(PainterTest, GoToPointTopLeft_GMS) {
+    MockTurtle mock_turtle;
+    Painter painter(&mock_turtle);
+    
+    auto coro = COROUTINE(GoToPointTopLeft_GMS) {
+        MockCallHandle c = WAIT_FOR_CALL();
+        EXPECT_TRUE( c.IS_CALL(mock_turtle, GoTo).With(Lt()) );
+        c.RETURN();
+    };
+
+    coro.WATCH_CALL();
+
+    painter.GoToPointTopLeft();
+}
+ 
+TEST(PainterTest, DrawDot_GMS) {
+    MockTurtle mock_turtle;
+    Painter painter(&mock_turtle);
+    
+    auto coro = COROUTINE(MethodName) {
+        // Similar to WillOnce(Return())
+        WAIT_FOR_CALL().RETURN();
+    };
+
+    coro.WATCH_CALL(mock_turtle, PenDown);
+    EXPECT_CALL(mock_turtle, PenUp);
+    
+    painter.DrawDot();
+}
+ 
+TEST(PainterTest, DrawDot2_GMS) {
+    MockTurtle mock_turtle;
+    Painter painter(&mock_turtle);
+    
+    auto coro = COROUTINE(MethodName) {
+        // Similar to WillOnce(Return())
+        WAIT_FOR_CALL(mock_turtle, PenDown).RETURN();
+    };
+
+    coro.WATCH_CALL();
+    EXPECT_CALL(mock_turtle, PenUp);
+    
+    painter.DrawDot();
+}
+
+TEST(PainterTest, Retire) {
+    MockTurtle mock_turtle;
+    Painter painter(&mock_turtle);
+    
+    auto coro = COROUTINE(Retuire) {
+        WAIT_FOR_CALL(mock_turtle, PenDown).RETURN();
+        RETIRE(); 
+    };
+
+    EXPECT_CALL(mock_turtle, PenUp).WillRepeatedly(Return());
+    coro.WATCH_CALL();
+    
+    painter.DrawDot();
+}
+
+TEST(PainterTest, Satisfy) {
+    MockTurtle mock_turtle;
+    Painter painter(&mock_turtle);
+    
+    auto coro = COROUTINE(Satisfy) {
+        WAIT_FOR_CALL(mock_turtle, PenDown).RETURN();
+        WAIT_FOR_CALL(mock_turtle, PenUp).RETURN();
+        SATISFY(); 
+        WAIT_FOR_CALL(mock_turtle, PenDown).RETURN();
+        WAIT_FOR_CALL(mock_turtle, PenUp).RETURN();
+    };
+
+    coro.WATCH_CALL();
+    
+    painter.DrawDot();
+}
+ 
+TEST(PainterTest, TwoCoroutine) {
+    MockTurtle mock_turtle;
+    Painter painter(&mock_turtle);
+    
+    auto coro1 = COROUTINE(Coro1) {
+        WAIT_FOR_CALL(mock_turtle, PenUp).RETURN();
+    };
+    auto coro2 = COROUTINE(Coro2) {
+        WAIT_FOR_CALL(mock_turtle, PenDown).RETURN();
+        RETIRE();
+    };
+
+    coro1.WATCH_CALL();
+    coro2.WATCH_CALL();
+    
+    painter.DrawDot();
+}
+ 
+TEST(PainterTest, TwoCoroutineLaunch) {
+    MockTurtle mock_turtle;
+    Painter painter(&mock_turtle);
+    
+    auto coro1 = COROUTINE(Coro1) {
+        WATCH_CALL();
+        WAIT_FOR_CALL(mock_turtle, PenUp).RETURN();
+    };
+    auto coro2 = COROUTINE(Coro2) {
+        WATCH_CALL();
+        auto l = LAUNCH( painter.DrawDot() );
+        WAIT_FOR_CALL(mock_turtle, PenDown).RETURN();
+        WAIT_FOR_RESULT_FROM(l);
+    };
+}
  
 // For interworking guide, cover COROUTINE() and NEW_COROUTINE(),
 // the cardinality API and EXIT_COROUTINE. Do multi-coro examples.
@@ -328,3 +438,43 @@ COTEST(PainterTest, MultiLaunch)
 // For serverised guide, cover NEXT_EVENT(), IS_CALL() with no args,
 // IS_RESULT() and EventHandle. But it's probably OK to directly reference
 // cotest-serverised.cc examples
+
+/*
+ * failing on mock return
+
+COTEST(PainterTest, SquareInkChecks3)
+{
+    MockTurtle mock_turtle;
+    Painter painter(&mock_turtle);
+    EXPECT_CALL(mock_turtle, InkCheck).WillRepeatedly(Return());
+    WATCH_CALL();
+
+    auto l = LAUNCH( painter.DrawSquareInkChecks(5) );
+    WAIT_FOR_CALL(mock_turtle, PenDown).RETURN();
+    EventHandle event;
+    for( int i=0; i<4; i++ )
+    {
+        event = NEXT_EVENT();
+        if( event.IS_CALL(mock_turtle, PenUp) ) {
+            event.ACCEPT();
+            break;
+        }
+        else if( event.IS_CALL(mock_turtle, Forward) ) {
+            event.ACCEPT();
+        }
+        else {
+            event.DROP();
+            continue;
+        }
+        
+        EXPECT_TRUE( event.IS_CALL(mock_turtle, Forward(5)) );
+        event.RETURN();
+        WAIT_FOR_CALL(mock_turtle, Turn(90)).RETURN();
+    }
+    event.RETURN();
+    WAIT_FOR_RESULT();
+    SATISFY(); // Workaround issue #11
+}
+*/
+
+
