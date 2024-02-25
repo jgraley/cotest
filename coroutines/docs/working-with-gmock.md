@@ -27,13 +27,13 @@ TEST(PainterTest, GoToPointTopLeft_GMS) {
     painter.GoToPointTopLeft();
 }
 ```
-> [NOTE]
+> [!NOTE]
 > We call `WATCH_CALL()` on a coroutine object when we are
 > not calling it from within a coroutine.
 
 After setting up the watch, we can call the code-under-test directly, to launch it.
 
-> [TIP]
+> [!TIP]
 > `NEW_COROUTINE` may be used to create a coroutine on the heap; it returns a
 > pointer to a coroutine object which should be freed using `delete`.
 
@@ -64,11 +64,11 @@ They could occur in the reverse order and this test would still pass.
 In the above test, we could use a wildcarded watch, and check that the coroutine
 got the right call inside the coroutine body.
 
-> [TIP]
+> [!TIP]
 > This is how we can introduce Cotest gradually, or in a limited way, to
 > existing test infrastructure.
 
-> [NOTE]
+> [!NOTE]
 > `WATCH_CALL` can be understood as Cotest's version of `EXPECT_CALL`:
 > - It has the same syntax as `EXPECT_CALL` with the addition of wildcard usage.
 > - It has full matcher support and can be used with `.With()`
@@ -145,7 +145,7 @@ as follows:
  - A coroutine is saturated on exit, and then oversaturated if another call is seen
    - unless RETIRE() has been called. 
 
-> [WARNING]
+> [!WARNING]
 > If exiting a coroutine early, please use `EXIT_COROUTINE()` instead of `return`.
 > This is to preserve compatibility with C++20.
 
@@ -218,12 +218,12 @@ Coro2 performs a launch, which drives the mock call mechanism: it handles
 `PenDown()`, then Coro1 handles `PenUp()` and then Coro2 handles the launch
 result.
  
-> [NOTE]
+> [!NOTE]
 > Launch results must always be handled by the lauching coroutine. It is only
 > mock calls that can be handled by any coroutine. This is a natural extension
 > of Google Mock's mock handling philosophy.
 
-> [WARNING]
+> [!WARNING]
 > In test cases like this, it's important to check the declaration order of
 > the coroutines. If the two coroutines in the example were exchanged, Coro2
 > would begin its initial activity before Coro1 has been created. It is not
