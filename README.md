@@ -20,6 +20,7 @@ This project is a fork of Google Test, and changes to gtest/gmock source code ha
 
 ## Documentation
  - [Getting Started With Cotest](coroutines/docs/getting-started.md).
+ - [Interworking with GMock](coroutines/docs/working-with-gmock.md).
  - [Discussion: Testing With Two Computers](coroutines/docs/testing-with-two-computers.md) for background on coroutine-based testing.
 
 ## Examples
