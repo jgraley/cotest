@@ -32,7 +32,7 @@ There are many more cotest scripts in [`test/`](coroutines/test/)
 
 ## To build and run the tests
 
-From repo top level:
+Cotest currently only supports CMake. From repo top level:
 ```
 mkdir build
 cd build
