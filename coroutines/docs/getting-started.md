@@ -36,7 +36,7 @@ COTEST(MyTest, Case1) {
     EXPECT_EQ(result_handle(launch_handle), 72);
 }
 ```
-Note that:
+Observations:
  1. `LaunchHandle` is templated on the result type, which is the `decltype()` of the supplied expression.
  2. To extract the actual return value, we use function call syntax, combining the two handles: `result(launch)`
 
