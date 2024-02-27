@@ -25,7 +25,7 @@ User documentation comes in three parts:
  3. [Cotest Server Style](coroutines/docs/server-style.md)
 
 For background on the idea of coroutine-based testing, see
- - [Discussion: Testing With Two Computers](coroutines/docs/testing-with-two-computers.md) for background on coroutine-based testing
+ - [Discussion: Testing with Two Computers](coroutines/docs/testing-with-two-computers.md) for background on coroutine-based testing
 
 ## Examples
 
