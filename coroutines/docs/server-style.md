@@ -1,5 +1,7 @@
 # Cotest Server Style
 
+Please see [the test case for the examples](/coroutines/test/examples-for-docs.cc) for code-under-test and mocking assets
+
 ## Server style API
 
 A few of Cotest's API functions are designated as forming the _server-style API_. These are simple to use, but a rule applies to their usage which we must be careful to respect.
