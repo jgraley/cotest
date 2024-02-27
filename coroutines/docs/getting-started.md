@@ -91,11 +91,11 @@ Mocking assets (mock object and interface class) are built just the same way as 
 
 Let's call a code-under-test function that makes a mock call. 
 
-In order to be able to handle a mock call inside a coroutine, it needs to be able to _see_ the call. This is achieved using `WATCH_CALL()`. If a call is made that we cannot see, Google Mock will treat it as an unhandled mock call. 
+In order to be able to handle a mock call inside a coroutine, it needs to be able to _see_ the call. This is achieved using `WATCH_CALL`. If a call is made that we cannot see, Google Mock will treat it as an unhandled mock call. 
 
 We will: 
  - Inject a dependency onto our mock object by passing a pointer to the code-under-test.
- - Make sure Cotest can see mock calls using `WATCH_CALL()`.
+ - Make sure Cotest can see mock calls using `WATCH_CALL`.
  - The test proceeds as seen above aside from the inclusion of mock handling code.
 
 #### Test with a mock call example
@@ -117,8 +117,8 @@ COTEST(PainterTest, GoToPoint)
 }
 ```
 To handle the mock:
- - We have used `WAIT_FOR_CALL()` which will give us a mock call handle as soon as the mock call is made.
- - We have checked that the call is correct using `IS_CALL()` which has semantics similar to Google Mock's `EXPECT_CALL()`; a match evaluates to `true`.
+ - We have used `WAIT_FOR_CALL` which will give us a mock call handle as soon as the mock call is made.
+ - We have checked that the call is correct using `IS_CALL` which has semantics similar to Google Mock's `EXPECT_CALL`; a match evaluates to `true`.
  - We instruct the mock call to return. `GoTo()` returns void so no value is required. 
 
 > [!TIP]
@@ -153,7 +153,7 @@ COTEST(PainterTest, GoToPoint2)
     SATISFY(); // Workaround issue #11
 }
 ```
-The more restrictive forms of `WATCH_CALL()` will prevent the coroutine from seeing calls that don't match. These calls will then be dealt with by Google Mock in the same way as a call that has no matching `EXPECT_CALL()`. Indeed, `WATCH_CALL()` is the Cotest counterpart to `EXPECT_CALL()`. 
+The more restrictive forms of `WATCH_CALL` will prevent the coroutine from seeing calls that don't match. These calls will then be dealt with by Google Mock in the same way as a call that has no matching `EXPECT_CALL()`. Indeed, `WATCH_CALL` is the Cotest counterpart to `EXPECT_CALL`. We can use as many `WATCH_CALL` directives as we wish.
 
 Let's try using Cotest for a case where the return values we supply to mock calls will affect behaiour of the code-under-test. In this case, the code-under-test stops calling `GetX()` or `GetY()` as soon as one of them returns a co-ordinate that is out of range. 
 
@@ -213,9 +213,9 @@ COTEST(PainterTest, RandomPointOnCircle)
 
 > [!TIP]
 > In summary, there are three ways of "filtering" mock calls:
-> 1. Arguments passed to `WATCH_CALL()` - this is called _exterior filtering_ and limits what the coroutine can _see_.
-> 2. Arguments passed to `WAIT_FOR_CALL()` - this is called _interior filtering_ and limits what the coroutine will _accept_.
-> 3. Checking using `EXPECT_` macros and `IS_CALL()` etc
+> 1. Arguments passed to `WATCH_CALL` - this is called _exterior filtering_ and limits what the coroutine can _see_.
+> 2. Arguments passed to `WAIT_FOR_CALL` - this is called _interior filtering_ and limits what the coroutine will _accept_.
+> 3. Checking using `EXPECT_` macros and `IS_CALL` etc
 > 
 > In the first two cases, GMock may in fact be able to handle the call in [another way](working-with-gmock.md).
 
