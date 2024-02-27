@@ -1,4 +1,4 @@
-# Testing With Two Computers
+# Testing with Two Computers
 _This is a simplified overview of conventional and coroutine-based unit testing. We explore the steps taken by a conventional test and then present the same test in a coroutine model. We use an analogy with computers that can "only do one thing at a time" and then discuss how coroutines fit in at the end._
 ## Conventional testing, using one computer
 For this exercise, we will assume that the computers illustrated can only run a single "program" at a time. Therefore, whenever code calls a function, the computer is committed to running that function to completion before it can do anything else[^1].
