@@ -1,4 +1,4 @@
-# Getting Started With Cotest
+# Getting Started with Cotest
 
 ## Launching the code-under-test 
 
