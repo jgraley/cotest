@@ -165,7 +165,9 @@ TEST(PainterTest, TwoCoroutine) {
     painter.DrawDot();
 }
 ```
-Two coroutines have been declared and each has been given a watch on any mock call. The watches do not have to be declared in the same order as the coroutines. In this case, `Coro2` has the higher priority and will see mock calls before `Coro1`, so we need to add `RETIRE()` so that `Coro1` gets to see the second mock call, which we expect to be `PenUp`.
+Two coroutines have been declared and each has been given a watch on any mock call. The watches do not have to be declared in the same order as the coroutines. 
+
+In this test case, `Coro2` has the higher priority and will see mock calls before `Coro1`, so we need to add `RETIRE()` so that `Coro1` gets to see the second mock call, which we expect to be `PenUp()`.
 
 Let's try launching code-under-test from one coroutine and handling a resulting mock call in a different coroutine.
 
