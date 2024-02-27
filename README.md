@@ -19,9 +19,13 @@ but a test coroutine can control the order in which mock calls are allowed to re
 This project is a fork of Google Test, and changes to gtest/gmock source code have been kept minimal. C++14.
 
 ## Documentation
- - [Getting Started With Cotest](coroutines/docs/getting-started.md).
- - [Interworking with Google Mock](coroutines/docs/working-with-gmock.md).
- - [Discussion: Testing With Two Computers](coroutines/docs/testing-with-two-computers.md) for background on coroutine-based testing.
+User documentation comes in three parts:
+ 1. [Getting Started with Cotest](coroutines/docs/getting-started.md)
+ 2. [Interworking with Google Mock](coroutines/docs/working-with-gmock.md)
+ 3. [Cotest Server Style](coroutines/docs/server-style.md)
+
+For background on the idea of coroutine-based testing, see
+ - [Discussion: Testing With Two Computers](coroutines/docs/testing-with-two-computers.md) for background on coroutine-based testing
 
 ## Examples
 
