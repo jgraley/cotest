@@ -61,24 +61,24 @@ COTEST(PainterTest, SquareInkChecks3)
 Server style begins with `event = NEXT_EVENT();`. We then enter an if-else-if chain that covers the three possible cases:
  - `PenUp()`: signifies code-under-test is finishing. We want to handle this so we accept and break out of our loop.
  - `Forward()`: signifies code-under-test is continuing. We want to handle this so we accept and let our loop body run.
- - Any other: Not for us to handle. We will drop the call and jump back to `event = NEXT_EVENT();`
+ - Any other: not for us to handle. We will drop the call and jump back to `event = NEXT_EVENT();`
 
- Note that we didn't need to call `event.ACCEPT()` necause in each case, we immediately call `event.RETURN()`. However, it
- is good practice to get to a `DROP()` or `ACCEPT()` reasonably soon, because of the limitations on what we can do in the meantime.
+ We didn't need to call `event.ACCEPT()` because in each case, we immediately call `event.RETURN()`. However, it
+ is good practice to get to a `DROP()` or `ACCEPT()` as soon as practiable.
 
 > [!NOTE]
-> Cotest's `WAIT_FOR_` are built on the server API. They use NEXT_EVENT() to get events. If the event is desired, they
-> accept the call and return the handle, otherwise they drop the call and try again. 
+> Cotest's `WAIT_FOR_` macros are built on the server API. They use `NEXT_EVENT()` to get events. If the event is desired, they
+> accept it (if a call) and return the handle, otherwise they drop it and try again.
 
 ## Server-style tests
 
-This part of Cotest's API is called server style because it permits or even seems to encourage a style of test case in which we poll for incoming events inside a loop and then dispatch them handler code depending on which event was received. 
+This part of Cotest's API is called _server style_ because it permits (or even seems to encourage) a style of test case in which we poll for incoming events inside a loop and then dispatch them to handlers depending on which event was received. 
 
-In [the server-style examples](../test/cotest-serverised.cc) we have two examples in this style. `Example1` runs an event loop that can respond in four differnet ways to incoming events:
+In [the server-style examples](../test/cotest-serverised.cc) there are two examples in this style. `Example1` runs an event loop that can respond in four different ways to incoming events:
  - Call to `Mock1()`: argument value is checked and call is returned.
  - Call to `Mock2()`: argument value is checked, call is returned, and then a call to `MockExtra()` is expected and returned.
  - Call to `Mock3()`: this server drops it for something else to handle
- - Return from the launch
+ - Launch result: check return value and then finish the test.
 
 This test mostly doesn't care in what order mock calls are made (just as a server doesn't care in what order clients send requests) but we have been able to enforce a conditional sub-sequence requirement: that one such call is always followed by a specific subsequent call.
 
@@ -86,5 +86,5 @@ This test mostly doesn't care in what order mock calls are made (just as a serve
 
 Other techniques that could be used with server-style tests include:
  - Global modality: multiple event loops are coded, one for each of a number of _modes_, and when we want to switch mode we jump between the loops.
- - Multiple servers: manage complexity by splitting into multiple server loops, one coroutine each, and have the higher priority ones drop calls for others to handle.
- - Trigger launches based on incoming watch calls. The server cal deal with completion as and when it happens.
+ - Multiple servers: manage complexity by splitting into multiple server loops, one coroutine each, and have the higher priority ones drop calls for other ones to handle.
+ - Trigger launches based on incoming watch calls. The server can deal with completion as and when it happens.
