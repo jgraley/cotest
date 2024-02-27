@@ -250,7 +250,7 @@ COTEST(PainterTest, SquareInkChecks1)
 ```
 
 The new code-under-test method `DrawSquareInkChecks()` makes calls to `InkCheck()` and we want to absorb them without error. 
-Since the `EXPECT_CALL()` comes after the `WATCH_CALL()` it has a higher priority. This means the coroutine will not _see_ the call if the expectation handles it, and in this case the expectation handles all calls to `InkCheck()`.
+Since the `EXPECT_CALL()` comes after the `WATCH_CALL()` it has a higher priority. This means the coroutine will not see the call if the expectation handles it, and in this case the expectation handles all calls to `InkCheck()`.
 
 #### Coroutine at higher prio example
 
