@@ -28,8 +28,7 @@ TEST(PainterTest, GoToPointTopLeft_GMS) {
 }
 ```
 > [!NOTE]
-> We call `WATCH_CALL()` on a coroutine object when we are
-> not calling it from within a coroutine.
+> We call `WATCH_CALL` on a coroutine object when we are not calling it from within a coroutine.
 
 After declaring assets, coroutine and setting up the watch, we can launch the code-under-test by calling it directly as with Google Test. We call this _launching from main_.
 
@@ -66,7 +65,7 @@ They could occur in the reverse order and this test would still pass. In the abo
 > legacy test cases.
 
 > [!NOTE]
-> `WATCH_CALL` can be understood as Cotest's version of `EXPECT_CALL`:
+> `WATCH_CALL` can be understood as a counterpart to `EXPECT_CALL`:
 > - It has the same syntax as `EXPECT_CALL` with the addition of wildcard usage.
 > - It supports matcher speecification including `.With()`
 > - It participates in mock call dispatch, and respects GMock's priority scheme.
