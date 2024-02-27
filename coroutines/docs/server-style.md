@@ -2,14 +2,14 @@
 
 ## Server style API
 
-A few of Cotest's API functions are designated as being the server-style API. This part of the API is simple to use, but a rule applies to its usage.
+A few of Cotest's API functions are designated as forming the _server-style API_. These are simple to use, but a rule applies to their usage which we must be careful to respect.
 
 The server API functions are
- - `NEXT_EVENT()` - this returns the next event received by the coroutine
+ - `NEXT_EVENT()` - this returns the next event received by the coroutine (can be mock call or launch result)
  - `ACCEPT()` - tells Cotest that this coroutine will handle the mock call
  - `DROP()` - tells Cotest the corotuine will not handle the call and GMock should continue searching for a handler
 
-The rule is that once we have a handle from `NEXT_EVENT()` we must call `DROP()` or `ACCEPT()` on that handle before making any launches or returning from any other mock calls. It is OK to return on the handle provided by `NEXT_EVENT()` because in this case `ACCEPT()` in inferred.
+The rule is that if we call `NEXT_EVENT()` and it returns a mock call handle, we must call `DROP()` or `ACCEPT()` on that handle before making any launches or returning from any other mock calls. It is also OK to `RETURN()` on the handle provided by `NEXT_EVENT()` because in this case `ACCEPT()` in inferred.
 
 The handle returned by `NEXT_EVENT()` is an event handle, and can represent a mock call or a launch result:
  - `event.IS_CALL()` will return a valid handle (casts to `true`) if it's a mock call.
@@ -18,9 +18,9 @@ The handle returned by `NEXT_EVENT()` is an event handle, and can represent a mo
 ## Returning to the square-drawing test case
 
 We now return to the example given at the end of [Interworking with Google Mock](working-with-gmock.md) in which we're testing an algorithm that uses a turtle to draw a square, and we have certain constraints:
- - Handle intermittent calls to `InkCheck()`
- - the `WATCH_CALL()` to be wild-carded and at a higher priority than the `EXPECT_CALL()` and
- - flexibility in the number of iterations of the loop
+ - The test must handle intermittent calls to `InkCheck()`.
+ - The `WATCH_CALL()` must be wild-carded and at a higher priority than the `EXPECT_CALL()`.
+ - We must demonstrate flexibility in the number of "sides" that the code-under-test actually draws.
 
 #### Flexible with ink check example
 ```
