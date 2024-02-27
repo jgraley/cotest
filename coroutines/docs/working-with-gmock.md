@@ -2,13 +2,11 @@
 
 ## Adding coroutines to a `TEST()` case
 
-Our test will begin running as a function in the initial, or "main"
-execution context, just as with Google Test/Mock.
+Our test case will begin running in the "main" execution context, just as with Google Test/Mock.
 
 We must explicitly declare a coroutine. The
-`COROUTINE` macro is a _factory_ for coroutine objects.
-It returns an instance of a coroutine. The optional argument to
-`COROUTINE` is an identifying name.
+`COROUTINE` macro is a _factory_ for coroutine objects and it returns an instance of a coroutine. The optional argument to
+`COROUTINE` is an optional name for the coroutine (no quotes required).
 
 #### Simple example
 ```
@@ -31,13 +29,13 @@ TEST(PainterTest, GoToPointTopLeft_GMS) {
 > We call `WATCH_CALL()` on a coroutine object when we are
 > not calling it from within a coroutine.
 
-After setting up the watch, we can call the code-under-test directly, to launch it.
+After declaring assets, coroutine and setting up the watch, we can launch the code-under-test by calling it directly as with Google Test. We call this _launching from main_.
 
 > [!TIP]
 > `NEW_COROUTINE` may be used to create a coroutine on the heap; it returns a
 > pointer to a coroutine object which should be freed using `delete`.
 
-Let's try mixing watches with CTest expectations. We will launch `DrawDot()` which
+Let's try mixing watches with Google Mock expectations. We will launch `DrawDot()` which
 will call `PenDown()` and `PenUp()`. Somewhat arbitrarily, one of these will be
 handled by a coroutine and the other by an expectation.
 
@@ -59,10 +57,7 @@ TEST(PainterTest, DrawDot_GMS) {
 }
 ```
 The calls do not in fact have to occur in order: `PenDown()` then `PenUp()`.
-They could occur in the reverse order and this test would still pass.
-
-In the above test, we could use a wildcarded watch, and check that the coroutine
-got the right call inside the coroutine body.
+They could occur in the reverse order and this test would still pass. In the above test, we could use a wildcarded watch, and check that the coroutine got the correct call inside the coroutine body.
 
 > [!TIP]
 > This is how we can introduce Cotest gradually, or in a limited way, to
@@ -71,18 +66,16 @@ got the right call inside the coroutine body.
 > [!NOTE]
 > `WATCH_CALL` can be understood as Cotest's version of `EXPECT_CALL`:
 > - It has the same syntax as `EXPECT_CALL` with the addition of wildcard usage.
-> - It has full matcher support and can be used with `.With()`
+> - It supports matcher speecification including `.With()`
 > - It participates in mock call dispatch, and respects GMock's priority scheme.
 > However:
-> - It does not support action or cardinality extensions - these are determined
->   by the coroutine, which we will now discuss.
+> - It does not support action or cardinality specifications - these are determined
+>   by the coroutine, which we will now discuss.  
 
 ## Cardinality
 
-It is normally an error for a coroutine to see a mock call after the
-coroutine body has exited (we call the coroutine _oversaturated_).
-A coroutine can elect to _retire_ before exit, in which case it will
-be ignored for the purposes of mock call dispatch.
+It is normally an error for a coroutine to see a mock call after the coroutine body has exited (we call the coroutine _oversaturated_). This is to avoid allowing a unit test to pass in an ambiguous scenario.
+However, a coroutine can elect to _retire_ before exit, in which case it will be ignored for the purposes of mock call dispatch.
  
 Let's suppose that we want the coroutine to handle `PenDown()` and an
 expectation to handle `PenUp()`. One way to do this is to give the coroutine 
@@ -143,18 +136,14 @@ Cotest provides an interpretation of _cardinality_ for coroutines. This works
 as follows:
  - There is one cardinality for each coroutine, regardless of the number of watches.
  - A coroutine is satisfied on exit, or earlier if `SATISFY()` is called.
- - A coroutine is saturated on exit, and then oversaturated if another call is seen
-   - unless RETIRE() has been called. 
+ - A coroutine is saturated on exit, and then oversaturated if another call is seen unless `RETIRE()` has been called. 
 
 > [!WARNING]
-> If exiting a coroutine early, please use `EXIT_COROUTINE()` instead of `return`.
-> This is to preserve compatibility with C++20.
+> If exiting a coroutine early, please use `EXIT_COROUTINE()` instead of `return`: this is to preserve compatibility with C++20 coroutines.
 
 ## Multiple Test Coroutines
 
-We can create as many coroutines as we requrire. Each will have its own
-cardinality which we must respect. GMock's priority scheme for mock call dispatch
-will be respected.
+We can create as many coroutines as we require. Each will have its own cardinality and GMock's priority scheme for mock call dispatch will be respected. 
 
 #### Example with multiple coroutines
 ```
@@ -176,12 +165,9 @@ TEST(PainterTest, TwoCoroutine) {
     painter.DrawDot();
 }
 ```
-We needed to add `RETIRE()` in Coro2 because its watch will cause it to see
-the `PenUp()` call, and we want it to ignore that call so that Coro1 can
-handle it.
+Two coroutines have been declared and each has been given a watch on any mock call. The watches do not have to be declared in the same order as the coroutines. In this case, `Coro2` has the higher priority and will see mock calls before `Coro1`, so we need to add `RETIRE()` so that `Coro1` gets to see the second mock call, which we expect to be `PenUp`.
 
-Let's try launching from one coroutine and handling one of the resulting mock
-calls in another coroutine.
+Let's try launching code-under-test from one coroutine and handling a resulting mock call in a different coroutine.
 
 #### Handle mock in other coroutine example
 ```
@@ -201,22 +187,19 @@ TEST(PainterTest, TwoCoroutineLaunch) {
     };
 }
 ```
-Coro1 handles the `PenUp()` mock call that results from Coro1 launching
+`Coro1` handles the `PenUp()` mock call that results from `Coro2` launching
 `DrawDot()`.
 
 The reason this test does anything at all in spite of appearing not to
 have a main body is that Cotest allows a coroutine to run when it is first
-created. This is called _initial activity_. The coroutine will run until
-its body waits for an event and an event has not already happened as
-a result of a previous action such as a `LAUNCH` or `RETURN`. At this
-point the coroutine yields and allows main to run.
+created. This is called _initial action_. At the point of instantiation, every coroutine will run until it is _blocked_, at which point it will yield and allow main to continue running. A coroutine is blocked when
+ - it waits for an event and
+ - an event has not already happened as a result of a previous `LAUNCH` or `RETURN`.
 
-In the example, Coro1 yields to main because it is waiting and no events
-that it can see have occurred yet.
+Coroutines yield when blocked in order to allow the test to continue: other corotuines can perform initial actions and/or main context can launch code-under-test.
 
-Coro2 performs a launch, which drives the mock call mechanism: it handles
-`PenDown()`, then Coro1 handles `PenUp()` and then Coro2 handles the launch
-result.
+In the example, `Coro1` is immediately blocked because it is waiting and no events
+that it can see have occurred yet, so it yields to main. `Coro2` performs a launch, which drives the mock call mechanism: it handles `PenDown()`, then Coro1 handles `PenUp()` and then `Coro2` handles the launch result. `Coro2` is never blocked in this example because both of its `WAIT_FOR_` calls are waiting for events that have already happened. When `Coro2` exits, it yields and the test case completes (permitting GMock to perform end-of-scope cardinality checks).
  
 > [!NOTE]
 > Launch results must always be handled by the lauching coroutine. It is only
@@ -226,7 +209,7 @@ result.
 > [!WARNING]
 > In test cases like this, it's important to check the declaration order of
 > the coroutines. If the two coroutines in the example were exchanged, Coro2
-> would begin its initial activity before Coro1 has been created. It is not
+> would begin its initial action before Coro1 has been created. It is not
 > possible for a coroutine to see a call that was made before the coroutine
 > was created, because the corresponding `WATCH_CALL` must have completed before
 > the mock call is made.
@@ -242,12 +225,13 @@ a Google Mock `EXPECT_CALL()` to handle them.
 
 #### Coroutine at lower prio example
 
-The solution in GMock is to add a separate expectation for these calls, or use `ON_CALL()`. In Cotest, we can do the same:
+The solution in GMock is to add a separate expectation for these calls (or use `ON_CALL()`). In Cotest, we can do the same:
 ```
 COTEST(PainterTest, SquareInkChecks1)
 {
     MockTurtle mock_turtle;
     Painter painter(&mock_turtle);
+
     WATCH_CALL();
     EXPECT_CALL(mock_turtle, InkCheck).WillRepeatedly(Return());
 
@@ -263,28 +247,30 @@ COTEST(PainterTest, SquareInkChecks1)
 }
 ```
 
-The new code-under-test method makes calls to `InkCheck()` and we want to absorb them without error. The `EXPECT_CALL()` works as per GMock and will absorb these calls. 
-
+The new code-under-test method `DrawSquareInkChecks()` makes calls to `InkCheck()` and we want to absorb them without error. 
 Since the `EXPECT_CALL()` comes after the `WATCH_CALL()` it has a higher priority. This means the coroutine will not _see_ the call if the expectation handles it, and in this case the expectation handles all calls to `InkCheck()`.
 
 #### Coroutine at higher prio example
 
-
-We could reverse the priorities if we wanted. The test case is interested in four different mock calls but not interested in a fifth, so things get a little unwieldly:
+We could reverse the priorities if we wanted:
 ```
 COTEST(PainterTest, SquareInkChecks2)
 {
     MockTurtle mock_turtle;
     Painter painter(&mock_turtle);
+
     EXPECT_CALL(mock_turtle, InkCheck).WillRepeatedly(Return());
     WATCH_CALL();
 
-    auto l = LAUNCH( painter.DrawSquareInkChecks(5) );
     ... From here, same as the previous example ...
 ```
 
-## What about the flexible example
+This works because we use interior filtering: the `WAIT_FOR_CALL(obj, call)` will drop any mock call that does not match, including the `InkCheck()` calls, and the expectation will handle them.
 
-If we require the `WATCH_CALL` to be wild-carded and at a higher priority
-than the `EXPECT_CALL`, we will need to begin using Cotest's [server style
-API](server-style.md). The linked doc begins with this case.
+## What about the flexible example?
+
+If we require
+ - handling of `InkCheck()`,
+ - the `WATCH_CALL` to be wild-carded and at a higher priority than the `EXPECT_CALL` and
+ - [flexibility in the number of iterations of the loop](getting-started.md#flexible-test-example).
+then we will need to begin using Cotest's [server style API](server-style.md). The linked doc begins with this case.
