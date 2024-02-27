@@ -156,13 +156,13 @@ std::string LaunchResultPayload::DebugString() const {
            ", R=" + PtrToString(responder.lock().get()) + ", rv=" + PtrToString(return_val_ptr) + ")";
 }
 
-ResumeMainPayload::ResumeMainPayload(std::weak_ptr<TestCoroutine> originator_) : originator(originator_) {}
+TCBlockedPayload::TCBlockedPayload(std::weak_ptr<TestCoroutine> originator_) : originator(originator_) {}
 
-PayloadKind ResumeMainPayload::GetKind() const { return PayloadKind::ResumeMain; }
+PayloadKind TCBlockedPayload::GetKind() const { return PayloadKind::TCBlocked; }
 
-std::weak_ptr<TestCoroutine> ResumeMainPayload::GetOriginator() const { return originator; }
+std::weak_ptr<TestCoroutine> TCBlockedPayload::GetOriginator() const { return originator; }
 
-std::string ResumeMainPayload::DebugString() const { return "PayloadKind::ResumeMain()"; }
+std::string TCBlockedPayload::DebugString() const { return "PayloadKind::TCBlocked()"; }
 
 TCExitedPayload::TCExitedPayload(std::weak_ptr<TestCoroutine> originator_) : originator(originator_) {}
 

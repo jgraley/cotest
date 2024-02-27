@@ -17,10 +17,10 @@ MessageNode::ReplyPair PreMockSynchroniser::ReceiveMessage(std::unique_ptr<Paylo
     // Fall-through machine with early return on reply.
     // Each state action is inside its own if-statement, meaning that multiple
     // actions and state transitions can complete in a signle iteration. The order
-    // of the if-statement is immaterial to the algorithm implmented by the
+    // of the if-statements is immaterial to the algorithm implmented by the
     // machine but does affect the states that can lead to an iteration
     // completing. Here we choose an ordering that does not end the iteration
-    // until a reply message is ready. Then do ensure we do end in this case, we
+    // until a reply message is ready. Then to ensure we do end in this case, we
     // use early returns.
 
     if (state == State::Idle) {
@@ -33,7 +33,7 @@ MessageNode::ReplyPair PreMockSynchroniser::ReceiveMessage(std::unique_ptr<Paylo
                 break;
             case PayloadKind::PreMockAck:
                 COTEST_ASSERT(!"Not expecting PRE_MOCK_ACK in State::Idle");
-            case PayloadKind::ResumeMain:
+            case PayloadKind::TCBlocked:
             case PayloadKind::TCExited:
                 state = State::PassToMain;
                 break;
@@ -64,7 +64,7 @@ MessageNode::ReplyPair PreMockSynchroniser::ReceiveMessage(std::unique_ptr<Paylo
                 state = send_pm_to.empty() ? State::Complete : State::Working;
                 break;
             }
-            case PayloadKind::ResumeMain:
+            case PayloadKind::TCBlocked:
                 // If we're waiting for an ack from a coroutine and instead get that it
                 // has nothing to do, we may be headed for a deadlock. Pass to main in
                 // case main can progress things. This path not covered by tests at the

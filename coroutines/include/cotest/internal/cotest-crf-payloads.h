@@ -40,7 +40,7 @@ enum class PayloadKind {
     ReturnMock,
     Launch,
     LaunchResult,
-    ResumeMain,
+    TCBlocked,
     TCExited,
     TCDestructing
 };
@@ -177,9 +177,9 @@ class LaunchResultPayload final : public Payload {
     const UntypedReturnValuePointer return_val_ptr;
 };
 
-class ResumeMainPayload : public Payload {
+class TCBlockedPayload : public Payload {
    public:
-    explicit ResumeMainPayload(std::weak_ptr<TestCoroutine> originator_);
+    explicit TCBlockedPayload(std::weak_ptr<TestCoroutine> originator_);
     PayloadKind GetKind() const;
     std::weak_ptr<TestCoroutine> GetOriginator() const;
     std::string DebugString() const final;

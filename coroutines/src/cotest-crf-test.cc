@@ -64,7 +64,7 @@ MessageNode::ReplyPair TestCoroutine::IterateServer(std::unique_ptr<Payload> &&t
             extra_iteration_requested = true;
             break;
         }
-        case PayloadKind::ResumeMain:
+        case PayloadKind::TCBlocked:
         case PayloadKind::TCExited:
             reply_dest = PreMockSynchroniser::GetInstance();
             break;
@@ -85,7 +85,7 @@ void TestCoroutine::InitialActivity() {
     std::unique_ptr<Payload> from_coro = SendMessageFromMain(this, nullptr);
     // We should return from this when the coro is blocked, eg waiting for
     // a mock call from somewhere other than a local launch
-    COTEST_ASSERT(from_coro->GetKind() == PayloadKind::TCExited || from_coro->GetKind() == PayloadKind::ResumeMain);
+    COTEST_ASSERT(from_coro->GetKind() == PayloadKind::TCExited || from_coro->GetKind() == PayloadKind::TCBlocked);
 }
 
 static MockSource *GetMockSourceFromMessage(const std::unique_ptr<Payload> &payload) {
@@ -115,7 +115,7 @@ static MockSource *GetMockSourceFromMessage(const std::unique_ptr<Payload> &payl
         case PayloadKind::ReturnMock:
         case PayloadKind::Launch:
         case PayloadKind::PreMockAck:
-        case PayloadKind::ResumeMain:
+        case PayloadKind::TCBlocked:
         case PayloadKind::TCExited:
             COTEST_ASSERT(!"Unhandled payload type");
             break;
@@ -164,7 +164,7 @@ std::shared_ptr<InteriorEventSession> TestCoroutine::NextEvent(const char *file,
                       << " no event has been sent to this coro, so requesting "
                          "resumption of main test function"
                       << std::endl;
-            response = MakePayload<ResumeMainPayload>(shared_from_this());
+            response = MakePayload<TCBlockedPayload>(shared_from_this());
         } else if (next_payload->GetKind() == PayloadKind::PreMock) {
             // Acknowledge PreMock, and then grab the subsequent message. We can
             // get another PreMock for example if GMock doesn't show us the mock call
@@ -219,13 +219,13 @@ void TestCoroutine::DestructionIterations() {
     std::unique_ptr<Payload> from_coro =
         SendMessageFromMain(this, MakePayload<TCDestructingPayload>(shared_from_this()));
     // This can cause coro to exit
-    COTEST_ASSERT(from_coro->GetKind() == PayloadKind::TCExited || from_coro->GetKind() == PayloadKind::ResumeMain);
+    COTEST_ASSERT(from_coro->GetKind() == PayloadKind::TCExited || from_coro->GetKind() == PayloadKind::TCBlocked);
     if (from_coro->GetKind() == PayloadKind::TCExited) {
         auto orig = PeekPayload<TCExitedPayload>(from_coro).GetOriginator().lock();
         COTEST_ASSERT(orig.get() == this);
     }
-    if (from_coro->GetKind() == PayloadKind::ResumeMain) {
-        auto orig = PeekPayload<ResumeMainPayload>(from_coro).GetOriginator().lock();
+    if (from_coro->GetKind() == PayloadKind::TCBlocked) {
+        auto orig = PeekPayload<TCBlockedPayload>(from_coro).GetOriginator().lock();
         COTEST_ASSERT(orig.get() == this);
     }
 }

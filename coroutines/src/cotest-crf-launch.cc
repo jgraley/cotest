@@ -62,10 +62,10 @@ MessageNode::ReplyPair LaunchCoroutine::ReceiveMessage(std::unique_ptr<Payload> 
 MessageNode::ReplyPair LaunchCoroutine::IterateServer(std::unique_ptr<Payload> &&to_coro) {
     COTEST_ASSERT(!IsCoroutineExited());
 
-    // It does not make sense to sent a waiting message into the launch coro, even
+    // It does not make sense to send a blocked message into the launch coro, even
     // though the message emerged from a test coro. The infrastructure must deal
     // with it.
-    if (to_coro) COTEST_ASSERT(to_coro->GetKind() != PayloadKind::ResumeMain);
+    if (to_coro) COTEST_ASSERT(to_coro->GetKind() != PayloadKind::TCBlocked);
 
     std::unique_ptr<Payload> from_coro = Iterate(std::move(to_coro));
 
@@ -110,7 +110,7 @@ MessageNode::ReplyPair LaunchCoroutine::IterateServer(std::unique_ptr<Payload> &
         case PayloadKind::TCExited:
         case PayloadKind::Launch:
         case PayloadKind::PreMockAck:
-        case PayloadKind::ResumeMain:
+        case PayloadKind::TCBlocked:
         case PayloadKind::TCDestructing: {
             COTEST_ASSERT("!unhandled message from launch coroutine");
         }

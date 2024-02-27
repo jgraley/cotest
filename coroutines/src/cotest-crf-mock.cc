@@ -76,7 +76,7 @@ bool MockRoutingSession::SeenMockCallLocked(UntypedArgsPointer args) {
             return false;
         case PayloadKind::Launch:
         case PayloadKind::PreMockAck:
-        case PayloadKind::ResumeMain:
+        case PayloadKind::TCBlocked:
         case PayloadKind::PreMock:
         case PayloadKind::MockSeen:
         case PayloadKind::MockAction:
