@@ -95,7 +95,7 @@ In order to be able to handle a mock call inside a coroutine, it needs to be abl
 
 We will: 
  - Inject a dependency onto our mock object by passing a pointer to the code-under-test.
- - Make sure Cotest can see mock calls using `WATCH_CALL()`
+ - Make sure Cotest can see mock calls using `WATCH_CALL()`.
  - The test proceeds as seen above apart from the inclusion of mock handling code.
 
 #### Test with a mock call example
