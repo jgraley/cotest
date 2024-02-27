@@ -1,5 +1,7 @@
 # Interworking with Google Mock
 
+Please see [the test case for the examples](/coroutines/test/examples-for-docs.cc) for code-under-test and mocking assets
+
 ## Adding coroutines to a `TEST()` case
 
 Our test case will begin running in the "main" execution context, just as with Google Test/Mock.
