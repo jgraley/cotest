@@ -272,5 +272,6 @@ This works because we use interior filtering: the `WAIT_FOR_CALL(obj, call)` wil
 If we require
  - handling of `InkCheck()`,
  - the `WATCH_CALL` to be wild-carded and at a higher priority than the `EXPECT_CALL` and
- - [flexibility in the number of iterations of the loop](getting-started.md#flexible-test-example).
-then we will need to begin using Cotest's [server style API](server-style.md). The linked doc begins with this case.
+ - [flexibility in the number of iterations of the loop](getting-started.md#flexible-test-example)
+   
+then we will need to begin using Cotest's [server style API](server-style.md) which is a lower-level and more flexible way of using Cotest.
