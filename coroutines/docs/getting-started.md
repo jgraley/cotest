@@ -19,7 +19,7 @@ class MyClass {
 ```
 In most testing frameworks, we would simply call the methods on an instance of the class, and check the return value and/or side effects. 
 
-In Cotest, this call is replaced by two steps: we _launch_ the code-under-test, and then we _wait_ for the launch to complete.
+In Cotest, this call is replaced by two steps: we _launch_ the code-under-test, and then we _wait_ for it to complete.
 
 This is accomplished as follows:
  - To launch, we use `LAUNCH( <expression> )` which returns a _launch handle_.
