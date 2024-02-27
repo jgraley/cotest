@@ -439,8 +439,6 @@ TEST(PainterTest, TwoCoroutineLaunch) {
 // IS_RESULT() and EventHandle. But it's probably OK to directly reference
 // cotest-serverised.cc examples
 
-/*
- * failing on mock return
 
 COTEST(PainterTest, SquareInkChecks3)
 {
@@ -452,7 +450,7 @@ COTEST(PainterTest, SquareInkChecks3)
     auto l = LAUNCH( painter.DrawSquareInkChecks(5) );
     WAIT_FOR_CALL(mock_turtle, PenDown).RETURN();
     EventHandle event;
-    for( int i=0; i<4; i++ )
+    while(true)
     {
         event = NEXT_EVENT();
         if( event.IS_CALL(mock_turtle, PenUp) ) {
@@ -475,6 +473,6 @@ COTEST(PainterTest, SquareInkChecks3)
     WAIT_FOR_RESULT();
     SATISFY(); // Workaround issue #11
 }
-*/
+
 
 
