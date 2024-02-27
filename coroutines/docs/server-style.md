@@ -70,9 +70,9 @@ Server style begins with `event = NEXT_EVENT();`. We then enter an if-else-if ch
 > Cotest's `WAIT_FOR_` are built on the server API. They use NEXT_EVENT() to get events. If the event is desired, they
 > accept the call and return the handle, otherwise they drop the call and try again. 
 
-## Server-style tset cases
+## Server-style tests
 
-This part of Cotest's API is called server style because it permits or even seems to encourage a style of test case in which we poll for incoming events inside a loop and then dispatch them handler code depending on which event was received. A test like this could be seen as a "mock call server".
+This part of Cotest's API is called server style because it permits or even seems to encourage a style of test case in which we poll for incoming events inside a loop and then dispatch them handler code depending on which event was received. 
 
 In [the server-style examples](../test/cotest-serverised.cc) we have two examples in this style. `Example1` runs an event loop that can respond in four differnet ways to incoming events:
  - Call to `Mock1()`: argument value is checked and call is returned.
@@ -80,10 +80,11 @@ In [the server-style examples](../test/cotest-serverised.cc) we have two example
  - Call to `Mock3()`: this server drops it for something else to handle
  - Return from the launch
 
-This test mostly doen's mind in what order mock calls are made (just as a server doesn't mind what order clients send requests) but we have been able to check a conditional sub-sequence requirement: that one such call is always followed by a specific subsequent call.
+This test mostly doesn't care in what order mock calls are made (just as a server doesn't care in what order clients send requests) but we have been able to enforce a conditional sub-sequence requirement: that one such call is always followed by a specific subsequent call.
 
-`Example2` goes on to repeat the same exercide, but now all the calls go to `Mock1()` and are differntiated by the value of the supplied argument. We `switch` on that value and perform the same actions as with `Example1`. This shows that we can use `GetArg<>()` to extract arg values bfore deciding whether to drop or accept.
+`Example2` goes on to repeat the same exercise, but now all the calls go to `Mock1()` and are differentiated by the value of the supplied argument. We `switch` on that value and perform the same actions as with `Example1`. This shows that we can use `GetArg<>()` to extract arg values before deciding whether to drop or accept.
 
-
- 
- - Discuss further options: global modality, multiple servers, mock triggers launch
+Other techniques that could be used with server-style tests include:
+ - Global modality: multiple event loops are coded, one for each of a number of _modes_, and when we want to switch mode we jump between the loops.
+ - Multiple servers: manage complexity by splitting into multiple server loops, one coroutine each, and have the higher priority ones drop calls for others to handle.
+ - Trigger launches based on incoming watch calls. The server cal deal with completion as and when it happens.
