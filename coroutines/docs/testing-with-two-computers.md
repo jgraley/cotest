@@ -1,4 +1,4 @@
-# Testing With Two Computers
+# Testing with Two Computers
 _This is a simplified overview of conventional and coroutine-based unit testing. We explore the steps taken by a conventional test and then present the same test in a coroutine model. We use an analogy with computers that can "only do one thing at a time" and then discuss how coroutines fit in at the end._
 ## Conventional testing, using one computer
 For this exercise, we will assume that the computers illustrated can only run a single "program" at a time. Therefore, whenever code calls a function, the computer is committed to running that function to completion before it can do anything else[^1].
@@ -49,7 +49,7 @@ There are in fact plenty of ways to permit multiple contexts of execution in a s
 
 Processes and threads differ in how memory is presented to the user's code. But both possess the interesting property that the computer's operating system can share CPU time across many of them, giving the impression that all are running at the same time (_concurrency_). 
 
-However, in the above example it isn't necessary to do this. Where we have said, "that function returns either immediately, or as soon as any message is received in reply" it transpires that our objectives are fully met if the test case _does_ have to wait for a reply. Indeed in a testing context, we might prefer to avoid the repeatability problems that can arise from concurrency.
+However, in the above example it isn't necessary to do this. Where we have said, "that function returns either immediately, or as soon as any message is received in reply" it transpires that our objectives are fully met if the test case _does_ have to wait for a reply. Indeed in a testing context, we might prefer to avoid the repeatability problems that could arise from concurrency here.
 
 We are also interested in the speed with which we can pass these messages. Unit test code on modern hardware might be able to send up to about one hundred million messages per second and it would be unfortunate to reduce this significantly just because of a testing framework design decision.
 

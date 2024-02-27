@@ -4,7 +4,7 @@
    It creates an RAII object, so an instance must be created and should be in 
    a local scope (i.e. of the test case). Coroutines are implemented as lambdas
    because a lambda can be a C++20 coroutine, and we can capture the mock objects.
-   This breeches S/S guidelines, but the UI is designed to make unsafe usafe difficult.
+   This breaks S/S guidelines, but the UI is designed to make unsafe usage difficult.
 
  - All cardinality functionality belongs interior to the coroutine. Therefore WillOnce(), Times()
    etc are not supported when routing calls to a coroutine. That's why the interior UI 

@@ -1,4 +1,4 @@
-# Getting Started With Cotest
+# Getting Started with Cotest
 
 ## Launching the code-under-test 
 
@@ -19,7 +19,7 @@ class MyClass {
 ```
 In most testing frameworks, we would simply call the methods on an instance of the class, and check the return value and/or side effects. 
 
-In Cotest, this call is replaced by two steps: we _launch_ the code-under-test, and then we _wait_ for the launch to complete.
+In Cotest, this call is replaced by two steps: we _launch_ the code-under-test, and then we _wait_ for it to complete.
 
 This is accomplished as follows:
  - To launch, we use `LAUNCH( <expression> )` which returns a _launch handle_.
@@ -36,9 +36,9 @@ COTEST(MyTest, Case1) {
     EXPECT_EQ(result_handle(launch_handle), 72);
 }
 ```
-Note that:
- 1. `LaunchHandle` is templated on the result type, which is the `decltype()` of the supplied expression.
- 2. To extract the actual return value, we use function call syntax, combining the two handles: `result(launch)`
+Observations:
+ - `LaunchHandle` is templated on the result type, which is the `decltype()` of the supplied expression.
+ - To extract the actual return value, we use function call syntax, combining the two handles: `result(launch)`
 
 To save typing, we can use `auto` for handles. We can also make the extraction of return value more compact. So we could write simply
 
@@ -87,16 +87,16 @@ COTEST(MyTest, Case3)
 ```
 ## Mocking with Cotest
 
-Mocking assets (mock object and interface class) are built just the same way as with Google Mock. Please see [the test case for the examples](/coroutines/test/examples-for-docs.cc) for code-under-test and mocking assets - this way we can concentrate on the Cotest test cases.
+Mocking assets (mock object and interface class) are built just the same way as with Google Mock. Please see [the test case for the examples](/coroutines/test/examples-for-docs.cc) for code-under-test and mocking assets.
 
 Let's call a code-under-test function that makes a mock call. 
 
-In order to be able to handle a mock call inside a coroutine, it needs to be able to _see_ the call. This is achieved using `WATCH_CALL()`. If a call is made that we cannot see, Google Mock will treat it as an unhandled mock call. 
+In order to be able to handle a mock call inside a coroutine, it needs to be able to _see_ the call. This is achieved using `WATCH_CALL`. If a call is made that we cannot see, Google Mock will treat it as an unhandled mock call. 
 
 We will: 
  - Inject a dependency onto our mock object by passing a pointer to the code-under-test.
- - Make sure Cotest can see mock calls using `WATCH_CALL()`
- - The test proceeds as seen above apart from the inclusion of mock handling code.
+ - Make sure Cotest can see mock calls using `WATCH_CALL`.
+ - The test proceeds as seen above aside from the inclusion of mock handling code.
 
 #### Test with a mock call example
 ```
@@ -117,8 +117,8 @@ COTEST(PainterTest, GoToPoint)
 }
 ```
 To handle the mock:
- - We have used `WAIT_FOR_CALL()` which will give us a mock call handle as soon as the mock call is made.
- - We have checked that the call is correct using `IS_CALL()` which has semantics similar to Google Mock's `EXPECT_CALL()`; a match evaluates to `true`.
+ - We have used `WAIT_FOR_CALL` which will give us a mock call handle as soon as the mock call is made.
+ - We have checked that the call is correct using `IS_CALL` which has semantics similar to Google Mock's `EXPECT_CALL`; a match evaluates to `true`.
  - We instruct the mock call to return. `GoTo()` returns void so no value is required. 
 
 > [!TIP]
@@ -153,7 +153,7 @@ COTEST(PainterTest, GoToPoint2)
     SATISFY(); // Workaround issue #11
 }
 ```
-The more restrictive forms of `WATCH_CALL()` will prevent the coroutine from seeing calls that don't match. These calls will then be dealt with by Google Mock in the same way as a call that has no matching `EXPECT_CALL()`. Indeed, `WATCH_CALL()` is the Cotest counterpart to `EXPECT_CALL()`. 
+The more restrictive forms of `WATCH_CALL` will prevent the coroutine from seeing calls that don't match. These calls will then be dealt with by Google Mock in the same way as a call that has no matching `EXPECT_CALL()`. Indeed, `WATCH_CALL` is the Cotest counterpart to `EXPECT_CALL`. We can use as many `WATCH_CALL` directives as we wish.
 
 Let's try using Cotest for a case where the return values we supply to mock calls will affect behaiour of the code-under-test. In this case, the code-under-test stops calling `GetX()` or `GetY()` as soon as one of them returns a co-ordinate that is out of range. 
 
@@ -213,9 +213,9 @@ COTEST(PainterTest, RandomPointOnCircle)
 
 > [!TIP]
 > In summary, there are three ways of "filtering" mock calls:
-> 1. Arguments passed to `WATCH_CALL()` - this is called _exterior filtering_ and limits what the coroutine can _see_.
-> 2. Arguments passed to `WAIT_FOR_CALL()` - this is called _interior filtering_ and limits what the coroutine will _accept_.
-> 3. Checking using `EXPECT_` macros and `IS_CALL()` etc
+> 1. Arguments passed to `WATCH_CALL` - this is called _exterior filtering_ and limits what the coroutine can _see_.
+> 2. Arguments passed to `WAIT_FOR_CALL` - this is called _interior filtering_ and limits what the coroutine will _accept_.
+> 3. Checking using `EXPECT_` macros and `IS_CALL` etc
 > 
 > In the first two cases, GMock may in fact be able to handle the call in [another way](working-with-gmock.md).
 
@@ -339,7 +339,7 @@ We find the problem using a succession of Cotest test cases:
 
 Caveats:
  - The assumption that `Example1()` is always started first is deliberately vague, and only serves to simplify the example.
- - A sanitiser or Valgrind might discover the unprotected `var_x` but I believe the example could be recoded using a second mutex to prevent `var_x`; the bug would then be an assumption about the order in which competing threads acquire the two mutexes.
+ - A sanitiser or Valgrind might discover the unprotected `var_x` but I believe the example could be recoded using a second mutex to protect `var_x`; the bug would then be an assumption about the order in which competing threads acquire the two mutexes.
  - This example is part of Cotest's development test suite, so the test case that finds the bug actually expects the "wrong" result from the code-under-test.
 
 Please see [the Cotest mutex example](../test/cotest-mutex.cc).
