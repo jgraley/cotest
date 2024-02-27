@@ -105,7 +105,7 @@ the coroutine does not oversaturate.
 
 It is normally an error for a coroutine _not_ to have exited by the
 time the test case completes (we call the coroutine _unsatisfied_).
-We can suppress this error by saying `SATISFIED()` inside the coroutine
+We can suppress this error by saying `SATISFY()` inside the coroutine
 at the point at which further activity should become optional for a
 test to pass.
 
