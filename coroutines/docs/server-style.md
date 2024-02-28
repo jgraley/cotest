@@ -1,6 +1,6 @@
 # Cotest Server Style
 
-Please see [the test case for the examples](/coroutines/test/examples-for-docs.cc) for code-under-test and mocking assets
+Code-under-test and mocking assets are in [the test suite for the examples](/coroutines/test/examples-for-docs.cc).
 
 ## Server style API
 
