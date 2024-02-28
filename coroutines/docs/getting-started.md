@@ -132,7 +132,7 @@ In place of `WATCH_CALL()` we could have used:
  - `WATCH_CALL(mock_turtle)` to only see calls to that mock object or
  - `WATCH_CALL(mock_turtle, GoTo)` to only see calls to that method, or for example
  - `WATCH_CALL(mock_turtle, GoTo(_, 1))` or
- - `WATCH_CALL(mock_turtle, GoTo(_, _)).With(Gt())` to only see calls with acceptable arguments.
+ - `WATCH_CALL(mock_turtle, GoTo(_, _)).With(Gt())` to only see calls with matching arguments.
 
 In the case of `WATCH_CALL(mock_turtle, GoTo(_, 1))`, we would not need to check inside the coroutine and could use just the following
 
