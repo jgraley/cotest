@@ -87,7 +87,7 @@ COTEST(MyTest, Case3)
 ```
 ## Mocking with Cotest
 
-Mocking assets (mock object and interface class) are built just the same way as with Google Mock. Please see [the test case for the examples](/coroutines/test/examples-for-docs.cc) for code-under-test and mocking assets.
+Mocking assets (mock object and interface class) are built just the same way as with Google Mock. Code-under-test and mocking assets are in [the test suite for the examples](/coroutines/test/examples-for-docs.cc).
 
 Let's call a code-under-test function that makes a mock call. 
 
