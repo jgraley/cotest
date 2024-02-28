@@ -26,8 +26,6 @@ Cotest supports test coroutines, mocking integrated with Google Mock, and launch
     - Also exceptions to/from code-under-test.
  4. Alternate coroutine backends, to include Boost coroutines and maybe C++20. Cotest currently uses coroutines built on threads.
  5. Thread safety - focussing on the case where launched code-under-test starts a thread which makes mock calls.
-    - Fixing any breakage to Google Mock locking, and applying sanitiser/fuzzer tools.
-
 
 ## Documentation
 User documentation comes in three parts:
