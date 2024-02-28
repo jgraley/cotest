@@ -219,19 +219,7 @@ TEST(ExteriorWildcardTest, MockObjectAddressAlias) {
     {
         StrictMock<MockClass> mock_object2;
 
-        // Known bug with WATCH_CALL( mock object )
-        // This call should not make it into the coroutine
-        // but it does because mock_object2 is at the same address as
-        // the now-deleted mock_object1. Not easy to fix: consider if
-        // we hadn't made any calls on mock_object - then the GMock code
-        // that registers the mocker would not have run. If we assume
-        // a call, then we could maybe use GMock's registry to recover
-        // the relationship - then we'd also need DetachMocker() so that
-        // the CotestWatcher can deduce that it needs to detach from the
-        // mock object too.
-        // However, the test case to cause this is very strange and seems
-        // to require the coro to be outside the scope of the mock objects -
-        // otherwise Watchers will be discarded before here.
+        // Known bug with WATCH_CALL( mock object ), see Github issue #14
         mock_object2.Mock6(200, 400);
     }
 }
