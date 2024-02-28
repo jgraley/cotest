@@ -20,7 +20,7 @@ This project is a fork of Google Test, and changes to gtest/gmock source code ha
 
 ## Development status
 
-Cotest supports mocking with Google Mock implementation and launches, which completes development phases 1 and 2. [Three further phases](https://github.com/jgraley/cotest/milestones) remain:
+Cotest supports test coroutines mocking integrated with Google Mock implementation and launche coroutines, which together complete development phases 1 and 2, bringing Cotest to concept demo status. [Three further phases](https://github.com/jgraley/cotest/milestones) remain:
 
  3. Test failure reporting: non-fatal failures integrated into Google Mock, more file/line info, and fixes to cardinality messages.
     - Also exceptions to/from code-under-test.
