@@ -18,6 +18,17 @@ but a test coroutine can control the order in which mock calls are allowed to re
  
 This project is a fork of Google Test, and changes to gtest/gmock source code have been kept minimal. C++14.
 
+## Development status
+
+Cotest supports mocking with Google Mock implementation and launches, which completes development phases 1 and 2. [Three further phases](https://github.com/jgraley/cotest/milestones) remain:
+
+ 3. Test failure reporting: non-fatal failures integrated into Google Mock, more file/line info, and fixes to cardinality messages.
+    - Also exceptions to/from code-under-test.
+ 4. Alternate coroutine backends, to include boost coroutines and maybe C++20. Cotest currently uses coroutines built on threads.
+ 5. Thread safety - focussing on the case where launched code-under-test starts a thread which makes mock calls.
+    - Fixing any breakage to Google Mock locking, and applying sanitiser/fuzzer tools.
+
+
 ## Documentation
 User documentation comes in three parts:
  1. [Getting Started with Cotest](coroutines/docs/getting-started.md)
