@@ -36,6 +36,9 @@ User documentation comes in three parts:
 For background on the idea of coroutine-based testing, see
  - [Discussion: Testing with Two Computers](coroutines/docs/testing-with-two-computers.md) for background on coroutine-based testing
 
+In lieu of a formal API specification, see
+ - [The public API header file](coroutines/include/cotest/cotest.h)
+
 ## Examples
 
  - [Unit tests](coroutines/test/cotest-mutex.cc) for a code sample that (mis-)uses a mutex.
