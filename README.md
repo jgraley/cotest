@@ -46,7 +46,7 @@ In lieu of a formal API specification, see
  - Using Cotest with GMock's `MockFunction<>`: [cotest-mockfunction.cc](coroutines/test/cotest-mockfunction.cc).
  - Complex matching example with commentry: [cotest-wild.cc](coroutines/test/cotest-wild.cc) (see `StackedCoros`).
 
-There are many more cotest scripts in [`test/`](coroutines/test/)
+There are many more examples in [`test/`](coroutines/test/)
 
 ## To build and run the tests
 
