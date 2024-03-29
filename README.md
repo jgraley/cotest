@@ -37,7 +37,7 @@ For background on the idea of coroutine-based testing, see
  - [Discussion: Testing with Two Computers](coroutines/docs/testing-with-two-computers.md) for background on coroutine-based testing
 
 In lieu of a formal API specification, see
- - [The public API header file](coroutines/include/cotest/cotest.h)
+ - the public API header file [cotest.h](coroutines/include/cotest/cotest.h)
 
 ## Examples
 
