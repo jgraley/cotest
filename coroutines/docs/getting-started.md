@@ -155,7 +155,7 @@ COTEST(PainterTest, GoToPoint2)
 ```
 The more restrictive forms of `WATCH_CALL` will prevent the coroutine from seeing calls that don't match. These calls will then be dealt with by Google Mock in the same way as a call that has no matching `EXPECT_CALL()`. Indeed, `WATCH_CALL` is the Cotest counterpart to `EXPECT_CALL`. We can use as many `WATCH_CALL` directives as we wish.
 
-Let's try using Cotest for a case where the return values we supply to mock calls will affect behaiour of the code-under-test. In this case, the code-under-test stops calling `GetX()` or `GetY()` as soon as one of them returns a co-ordinate that is out of range. 
+Let's try using Cotest for a case where the return values we supply to mock calls will affect behaviour of the code-under-test. In this case, the code-under-test stops calling `GetX()` or `GetY()` as soon as one of them returns a co-ordinate that is out of range. 
 
 Because we will return a value from our mock calls, we need to provide details of the expected call to Cotest by using for example `WAIT_FOR_CALL(mock_turtle, GetX)`. This allows Cotest to determine the _signature_ of the call, and hence its _return type_. 
 
