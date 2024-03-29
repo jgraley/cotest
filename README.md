@@ -41,8 +41,10 @@ In lieu of a formal API specification, see
 
 ## Examples
 
- - [Unit tests](coroutines/test/cotest-mutex.cc) for a code sample that (mis-)uses a mutex.
- - [Examples](coroutines/test/cotest-serverised.cc) of _serverised_ testing style.
+ - A code sample that (mis-)uses a mutex: [cotest-mutex.cc](coroutines/test/cotest-mutex.cc).
+ - Examples of _serverised_ testing style: [cotest-serverised.cc](coroutines/test/cotest-serverised.cc).
+ - Using Cotest with GMock's `MockFunction<>`: [cotest-mockfunction.cc](coroutines/test/cotest-mockfunction.cc).
+ - Complex matching example with commentry: [cotest-wild.cc](coroutines/test/cotest-wild.cc) (see `StackedCoros`).
 
 There are many more cotest scripts in [`test/`](coroutines/test/)
 
