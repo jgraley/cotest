@@ -49,24 +49,24 @@ namespace testing {
 // result = event_session( launch_session );
 
 // Note on cotest_coro_
-// cotest_coro_ is passed into coroutine body as a function parameter
+// cotest_coro_ is passed into test coroutine body as a function parameter
 // and is also a public member of a Coroutine. In both cases it just
 // points to the coroutine. So, in the body we can use NEXT_EVENT()
-// and outside, when we have a Coroutine, we can do coro->NEXT_EVENT().
+// and outside, when we have a coroutine, we can do coro->NEXT_EVENT().
 // cotest_coro_ is also helpful for reducing pollution of the global
 // namespace.
 
 // ------------------ cardinality etc --------------------
 
-// Indicate that the coroutine does not need to run to completion
+// Indicate that the test coroutine does not need to run to completion
 // in order for the test to pass
 #define SATISFY() cotest_coro_->SetSatisfied()
 
-// Indicate that it is not an error for the coroutine to see further
+// Indicate that it is not an error for the test coroutine to see further
 // mock calls after exiting (they will be dropped)
 #define RETIRE() cotest_coro_->Retire()
 
-// Return from mthe coroutine body. Please use this in preference to return
+// Return from the test coroutine body. Please use this in preference to return
 // for forward-compatibility with C++20 coroutines (and so we can grab
 // __FILE__ and __LINE__).
 #define EXIT_COROUTINE() return
@@ -141,7 +141,7 @@ namespace testing {
 #define IS_RESULT_ARG_1(DC) IsLaunchResult(DC)
 
 // Note: these operations also tell cotest that the launch return has
-// been detected by the coroutine. If this does not happen, cotest will
+// been detected by the test coroutine. If this does not happen, cotest will
 // report an error.
 
 // ---------------- wait for call ------------------
@@ -328,7 +328,7 @@ namespace testing {
     static void COTEST_TEST_CLASS_NAME_(TEST_SUITE_NAME, TEST_NAME)(::testing::internal::Coroutine * cotest_coro_)
 
 // Note: this is not in fact the most flexible way to use cotest. A regular
-// TEST() case can declare multiple coroutines, whereas a COTEST() only has one.
+// TEST() case can declare multiple test coroutines, whereas a COTEST() only creates one.
 
 // ------------------ serverised API ------------------
 
